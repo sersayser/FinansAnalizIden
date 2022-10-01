@@ -1,0 +1,1528 @@
+﻿@using Microsoft.AspNetCore.Identity
+@inject SignInManager<IdentityUser> SignInManager
+@inject UserManager<IdentityUser> UserManager
+@inject FinansAnaliz.Data.AppDbContext _appDbContext
+@{
+    Layout = null;
+    var user = _appDbContext.AppUsers.FirstOrDefault(x => x.UserName == SignInManager.UserManager.GetUserName(User));
+    var data = _appDbContext.EntryDates.Where(x => x.CompanyName == user.CompanyName).Any();
+    List<FinansAnaliz.Models.Rasyo> rasyo = ViewBag.Rasyo is 0 ? new List<Rasyo>() { new Rasyo() { CompanyName = user.CompanyName } } :ViewBag.Rasyo;
+    List<Dictionary<string, string>> aktif = ViewBag.aktif is 0 ? new List<Dictionary<string, string>>() { } : ViewBag.aktif;
+    List<DateTime> entryDates = ViewBag.entryDates is 0 ? new List<DateTime>() { } : ViewBag.entryDates;
+    List<RuleProblemCompany> ProblemCompanyList = ViewBag.ProblemCompanyList is 0 ? new List<RuleProblemCompany>() { } : ViewBag.ProblemCompanyList;
+    List<int> RuleIdList = ViewBag.RuleIdList is 0?new List<int>(){}:ViewBag.RuleIdList;
+
+    
+
+    var ruleCount = _appDbContext.ruleProblemCompanies.Where(x => x.IsActive == true).Where(x => x.RegisterCompany == user.CompanyName).Select(x => x.RuleId).Distinct().ToList();
+
+    var showBooks = _appDbContext.Settings.Where(x => x.CompanyName == user.CompanyName).Select(x => x.IsClientShowBook).FirstOrDefault();
+
+    int t = 0;
+    int r = 0;
+}
+
+
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, shrink-to-fit=no">
+    <title>Fintek - Analytics Dashboard</title>
+    <link rel="icon" type="image/x-icon" href="/assets/img/favicon.ico" />
+    <link href="/assets/css/loader.css" rel="stylesheet" type="text/css" />
+    <script src="/assets/js/loader.js"></script>
+    <link href="https://fonts.googleapis.com/css?family=Quicksand:400,500,600,700&display=swap" rel="stylesheet">
+    <link href="/bootstrap/css/bootstrap.min.css" rel="stylesheet" type="text/css" />
+    <link href="/assets/css/plugins.css" rel="stylesheet" type="text/css" />
+    <link href="/plugins/apex/apexcharts.css" rel="stylesheet" type="text/css">
+    <link href="/assets/css/dashboard/dash_1.css" rel="stylesheet" type="text/css" class="dashboard-analytics" />
+    <link rel="stylesheet" type="text/css" href="/plugins/table/datatable/datatables.css">
+    <link rel="stylesheet" type="text/css" href="/plugins/table/datatable/custom_dt_html5.css">
+    <link rel="stylesheet" type="text/css" href="/plugins/table/datatable/dt-global_style.css">
+    <link href="/css/blink.css" rel="stylesheet" type="text/css" />
+</head>
+<body class="dashboard-analytics">
+    <div id="load_screen">
+        <div class="loader">
+            <div class="loader-content">
+                <div class="spinner-grow align-self-center"></div>
+            </div>
+        </div>
+    </div>
+    <div class="header-container fixed-top">
+        <header class="header navbar navbar-expand-sm">
+            <a href="javascript:void(0);" class="sidebarCollapse" data-placement="bottom"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-menu"><line x1="3" y1="12" x2="21" y2="12"></line><line x1="3" y1="6" x2="21" y2="6"></line><line x1="3" y1="18" x2="21" y2="18"></line></svg></a>
+            <img class="ml-auto" style="height:12%;width:12%" src="~/web/assets/images/logo/logo.png" />
+            <ul class="navbar-item flex-row navbar-dropdown search-ul">
+                <li class="nav-item align-self-center search-animated">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-search toggle-search"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+                </li>
+                <li class="nav-item dropdown notification-dropdown">
+                    <a href="javascript:void(0);" class="nav-link dropdown-toggle" id="notificationDropdown" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-bell"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path><path d="M13.73 21a2 2 0 0 1-3.46 0"></path></svg><span class="badge badge-primary">ss</span>
+                    </a>
+                    <div class="dropdown-menu position-absolute" aria-labelledby="notificationDropdown">
+                        <div class="notification-scroll">
+                            @{
+                                if (ruleCount.Count != 0)
+                                {
+                                    <div class="dropdown-item">
+                                        <div class="media file-upload">
+                                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-alert-circle"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="8" x2="12" y2="12"></line><line x1="12" y1="16" x2="12.01" y2="16"></line></svg>
+                                            <div class="media-body">
+                                                <div class="data-info text-nowrap">
+                                                    <h6 class="">@ruleCount.Count kuralda eşik değerleri aşıldı.</h6>
+                                                    <a asp-controller="CRule" asp-action="Rule" class="">Detay için tıklayınız</a>
+                                                </div>
+
+                                                <div class="icon-status">
+                                                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-check"><polyline points="20 6 9 17 4 12"></polyline></svg>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                }
+
+                            }
+                        </div>
+                    </div>
+                </li>
+                <li class="nav-item dropdown user-profile-dropdown  order-lg-2 order-1">
+                    <a href="javascript:void(0);" class="nav-link dropdown-toggle user" id="userProfileDropdown" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                        <img src="/assets/img/90x90.jpg" alt="admin-profile" class="img-fluid">
+                    </a>
+                    <div class="dropdown-menu position-absolute" aria-labelledby="userProfileDropdown">
+                        <div class="user-profile-section">
+                            <div class="media mx-auto">
+
+                                <div class="media-body">
+                                    <h5>@User.Identity.Name</h5>
+                                    <p></p>
+
+                                </div>
+                            </div>
+                        </div>
+                        <div class="dropdown-item">
+                            <a asp-controller="Account" asp-action="LogOff">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-log-out"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path><polyline points="16 17 21 12 16 7"></polyline><line x1="21" y1="12" x2="9" y2="12"></line></svg> <span>Çıkış</span>
+                            </a>
+                        </div>
+                    </div>
+                </li>
+            </ul>
+        </header>
+    </div>
+    <div class="main-container" id="container">
+        <div class="overlay"></div>
+        <div class="search-overlay"></div>
+        <div class="sidebar-wrapper sidebar-theme">
+            <nav id="compactSidebar">
+                <ul class="navbar-nav theme-brand flex-row">
+                    <li class="nav-item theme-logo">
+                        <a href="index.html">
+                            <img src="/assets/img/90x901.jpg" class="navbar-logo" alt="logo">
+                        </a>
+                    </li>
+                </ul>
+                <ul class="menu-categories">
+                    @{
+                        if (!data)
+                        {
+
+                            <li class="menu menu-single active">
+                                <a data-active="false" class="menu-toggle" asp-controller="Client" asp-action="Index">
+                                    <div class="base-menu">
+                                        <div class="base-icons">
+                                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-home"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path><polyline points="9 22 9 12 15 12 15 22"></polyline></svg>
+                                        </div>
+                                        <span>Anasayfa</span>
+                                    </div>
+                                </a>
+                                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-chevron-left"><polyline points="15 18 9 12 15 6"></polyline></svg>
+                            </li>
+                            <li class="menu menu-single">
+                                <a data-active="false" class="menu-toggle" asp-controller="CDetail" asp-action="Index">
+                                    <div class="base-menu">
+                                        <div class="base-icons">
+                                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-trending-up"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"></polyline><polyline points="17 6 23 6 23 12"></polyline></svg>
+                                        </div>
+                                        <span>Mali Tablolar</span>
+                                    </div>
+                                </a>
+                                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-chevron-left"><polyline points="15 18 9 12 15 6"></polyline></svg>
+                            </li>
+                            <li class="menu menu-single">
+                                <a data-active="false" class="menu-toggle blink" asp-controller="MizanYukle" asp-action="Yukleme">
+                                    <div class="base-menu">
+                                        <div class="base-icons">
+                                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" d"="" class="feather feather-download"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
+                                        </div>
+                                        <span style="color:white">Mizan Yükle</span>
+                                    </div>
+                                </a>
+                                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-chevron-left"><polyline points="15 18 9 12 15 6"></polyline></svg>
+                            </li>
+                            <li class="menu">
+                                <a href="#warning" data-active="false" class="menu-toggle" disabled>
+                                    <div class="base-menu">
+                                        <div class="base-icons">
+                                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-zap"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon></svg>
+                                        </div>
+                                        <span>Uyarılar</span>
+                                    </div>
+                                </a>
+                                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-chevron-left"><polyline points="15 18 9 12 15 6"></polyline></svg>
+                            </li>
+                            <li class="menu">
+                                <a href="#guarantee" data-active="false" class="menu-toggle">
+                                    <div class="base-menu">
+                                        <div class="base-icons">
+                                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-file-text"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line><polyline points="10 9 9 9 8 9"></polyline></svg>
+                                        </div>
+                                        <span>Teminatlar</span>
+                                    </div>
+                                </a>
+                                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-chevron-left"><polyline points="15 18 9 12 15 6"></polyline></svg>
+                            </li>
+                            <li class="menu menu-single">
+                                <a data-active="false" class="menu-toggle" asp-controller="Chelp" asp-action="Index">
+                                    <div class="base-menu">
+                                        <div class="base-icons">
+                                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-help-circle"><circle cx="12" cy="12" r="10"></circle><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"></path><line x1="12" y1="17" x2="12.01" y2="17"></line></svg>
+                                        </div>
+                                        <span>Destek</span>
+                                    </div>
+                                </a>
+                                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-chevron-left"><polyline points="15 18 9 12 15 6"></polyline></svg>
+                            </li>
+                            <li class="menu menu-single active">
+                                <a asp-controller="Settings" asp-action="Client" data-active="false" class="menu-toggle">
+                                    <div class="base-menu">
+                                        <div class="base-icons">
+                                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-settings"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path></svg>
+                                        </div>
+                                        <span>Ayarlar</span>
+                                    </div>
+                                </a>
+                                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-chevron-left"><polyline points="15 18 9 12 15 6"></polyline></svg>
+                            </li>
+
+
+                        }
+                        else
+                        {
+
+                            <li class="menu menu-single active">
+                                <a data-active="false" class="menu-toggle" asp-controller="Client" asp-action="Index">
+                                    <div class="base-menu">
+                                        <div class="base-icons">
+                                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-home"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path><polyline points="9 22 9 12 15 12 15 22"></polyline></svg>
+                                        </div>
+                                        <span>Anasayfa</span>
+                                    </div>
+                                </a>
+                                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-chevron-left"><polyline points="15 18 9 12 15 6"></polyline></svg>
+                            </li>
+                            <li class="menu menu-single">
+                                <a data-active="false" class="menu-toggle" asp-controller="CDetail" asp-action="Index">
+                                    <div class="base-menu">
+                                        <div class="base-icons">
+                                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-trending-up"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"></polyline><polyline points="17 6 23 6 23 12"></polyline></svg>
+                                        </div>
+                                        <span>Mali Tablolar</span>
+                                    </div>
+                                </a>
+                                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-chevron-left"><polyline points="15 18 9 12 15 6"></polyline></svg>
+                            </li>
+                            <li class="menu menu-single">
+                                <a blank"="" data-active="false" class="menu-toggle" asp-controller="MizanYukle" asp-action="Yukleme">
+                                    <div class="base-menu">
+                                        <div class="base-icons">
+                                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" d"="" class="feather feather-download"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
+                                        </div>
+                                        <span>Mizan Yükle</span>
+                                    </div>
+                                </a>
+                                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-chevron-left"><polyline points="15 18 9 12 15 6"></polyline></svg>
+                            </li>
+                            <li class="menu">
+                                <a href="#warning" data-active="false" class="menu-toggle">
+                                    <div class="base-menu">
+                                        <div class="base-icons">
+                                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-zap"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon></svg>
+                                        </div>
+                                        <span>Uyarılar</span>
+                                    </div>
+                                </a>
+                                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-chevron-left"><polyline points="15 18 9 12 15 6"></polyline></svg>
+                            </li>
+                            <li class="menu">
+                                <a href="#guarantee" data-active="false" class="menu-toggle">
+                                    <div class="base-menu">
+                                        <div class="base-icons">
+                                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-file-text"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line><polyline points="10 9 9 9 8 9"></polyline></svg>
+                                        </div>
+                                        <span>Teminatlar</span>
+                                    </div>
+                                </a>
+                                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-chevron-left"><polyline points="15 18 9 12 15 6"></polyline></svg>
+                            </li>
+                            <li class="menu menu-single">
+                                <a data-active="false" class="menu-toggle" asp-controller="Chelp" asp-action="Index">
+                                    <div class="base-menu">
+                                        <div class="base-icons">
+                                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-help-circle"><circle cx="12" cy="12" r="10"></circle><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"></path><line x1="12" y1="17" x2="12.01" y2="17"></line></svg>
+                                        </div>
+                                        <span>Destek</span>
+                                    </div>
+                                </a>
+                                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-chevron-left"><polyline points="15 18 9 12 15 6"></polyline></svg>
+                            </li>
+                            <li class="menu menu-single active">
+                                <a asp-controller="Settings" asp-action="Client" data-active="false" class="menu-toggle">
+                                    <div class="base-menu">
+                                        <div class="base-icons">
+                                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-settings"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path></svg>
+                                        </div>
+                                        <span>Ayarlar</span>
+                                    </div>
+                                </a>
+                                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-chevron-left"><polyline points="15 18 9 12 15 6"></polyline></svg>
+                            </li>
+
+                        }
+                    }
+                </ul>
+            </nav>
+            <div id="compact_submenuSidebar" class="submenu-sidebar">
+                <div class="submenu" id="guarantee">
+                    <ul class="submenu-list" data-parent-element="#guarantee">
+                        <li>
+                            <a asp-controller="CTeminat" asp-action="AlinanTeminat"> Alınan Teminatlar </a>
+                        </li>
+                        <li>
+                            <a asp-controller="CTeminat" asp-action="VerilenTeminat"> Verilen Teminatlar </a>
+                        </li>
+                    </ul>
+                </div>
+                <div class="submenu" id="warning">
+                    <ul class="submenu-list" data-parent-element="#warning">
+                        <li>
+                            <a asp-controller="CRule" asp-action="Rule"> Uyarılar </a>
+                        </li>
+                        <li>
+                            <a asp-controller="CRule" asp-action="Settings"> Ayarlar </a>
+                        </li>
+
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+
+
+
+
+
+        <div id="content" class="main-content">
+            <div class="layout-px-spacing">
+                <div class="page-header">
+                    <nav class="breadcrumb-one" aria-label="breadcrumb">
+                        <ol class="breadcrumb">
+                            <li class="breadcrumb-item active" aria-current="page">@rasyo[0].CompanyName Mali Tabloları</li>
+                        </ol>
+                    </nav>
+                </div>
+                <ul class="nav nav-tabs  mb-3 mt-3" id="simpletab" role="tablist">
+                    <li class="nav-item">
+                        <a class="nav-link active" id="bilanco-tab" data-toggle="pill" href="#bilanco" role="tab" aria-controls="bilanco" aria-selected="true">Bilanço</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" id="gelir-tab" data-toggle="pill" href="#gelir" role="tab" aria-controls="gelir" aria-selected="false">Gelir Tablosu</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" id="rasyo-tab" data-toggle="pill" href="#rasyo" role="tab" aria-controls="rasyo" aria-selected="false">Rasyolar</a>
+                    </li>
+                </ul>
+                <div class="tab-content" id="simpletabContent">
+
+                    @{
+                        if (entryDates.Count == 0)
+                        {
+                            <div class="tab-pane fade show active" id="bilanco" role="tabpanel" aria-labelledby="bilanco-tab">
+                                <div class="row">
+                                    <h1 class=" text-left text-success ml-3">Mizan girişi yapılmadığından dolayı "Bilanço" oluşmamıştır.</h1>
+                                </div>
+                            </div>
+
+                            <div class="tab-pane fade" id="gelir" role="tabpanel" aria-labelledby="gelir-tab">
+                                <div class="row">
+                                    <h1 class=" text-left text-success ml-3">Mizan girişi yapılmadığından dolayı "Gelir Tablosu" oluşmamıştır.</h1>
+                                </div>
+                            </div>
+                            <div class="tab-pane fade" id="rasyo" role="tabpanel" aria-labelledby="rasyo-tab">
+                                <div class="row">
+                                    <h1 class=" text-left text-success ml-3">Mizan girişi yapılmadığından dolayı "Rasyolar" oluşmamıştır.</h1>
+                                </div>
+                            </div>
+
+                        }
+                        else
+                        {
+                            <div class="tab-pane fade show active" id="bilanco" role="tabpanel" aria-labelledby="bilanco-tab">
+
+
+                                <div class="row">
+                                    <h1 class=" text-left text-success">Bilanço Aktif</h1>
+                                </div>
+                                <div class="row">
+                                    <div class="col-lg-12">
+                                        <table class="table table-hover">
+                                            <thead>
+                                                <tr>
+                                                    <th>Hesap Adı</th>
+                                                    @for (int k = 0; k < (aktif.Count) / 4; k++)
+                                                    {
+                                                        r = k * 4;
+                                                        <th scope="col" style="text-align: end;"> @aktif[0 + r].ElementAt(3).Value </th>
+                                                        <th scope="col" class="text-center px-1" style="width: 40px; color: gray;"> @aktif[1 + r].ElementAt(3).Value</th>
+                                                        <th scope="col" class="text-center px-1" style="width: 40px; color: gray;"> @aktif[2 + r].ElementAt(3).Value</th>
+                                                        <th scope="col" class="text-center px-1" style="width: 40px; color: gray;"> @aktif[3 + r].ElementAt(3).Value</th>
+                                                    }
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                @for (int k = 5; k < aktif[0].Count; k++)
+                                                {
+                                                    <tr class="table-success font-weight-boldest text-decoration-underline">
+                                                        <td scope="col">@aktif[0].ElementAt(k).Key</td>
+
+                                                        @for (int j = 0; j < (aktif.Count) / 4; j++)
+                                                        {
+                                                            t = j * 4;
+                                                            <td scope="col" class="text-right"> @aktif[0 + t].ElementAt(k).Value</td>
+                                                            <td scope="col" class="text-center"> @aktif[1 + t].ElementAt(k).Value</td>
+                                                            <td scope="col" class="text-center"> @aktif[2 + t].ElementAt(k).Value</td>
+                                                            <td scope="col" class="text-center"> @aktif[3 + t].ElementAt(k).Value </td>
+                                                        }
+
+                                                    </tr>
+                                                }
+
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </div>
+                                <div class="row">
+                                    <h1 class="text-left text-success">Bilanço Pasif</h1>
+                                </div>
+                                <div class="row">
+                                    <div class="col-lg-12">
+                                        @{
+                                            int h = 0;
+                                            int g = 0;
+                                            List<Dictionary<string, string>> pasif = ViewBag.pasif;
+
+                                            <table class="table table-hover">
+                                                <thead>
+                                                    <tr>
+                                                        <th>Hesap Adı</th>
+
+                                                        @for (int m = 0; m < (pasif.Count) / 3; m++)
+                                                        {
+                                                            h = m * 3;
+                                                            <th scope="col" style="text-align: end;"> @pasif[0 + h].ElementAt(3).Value </th>
+                                                            <th scope="col" class="text-center px-1" style="width: 60px; color: gray;"> @pasif[1 + h].ElementAt(3).Value  </th>
+                                                            <th scope="col" class="text-center px-1" style="width: 60px; color: gray;"> @pasif[2 + h].ElementAt(3).Value  </th>
+                                                        }
+                                                    </tr>
+                                                </thead>
+                                                <tbody>
+                                                    @for (int b = 5; b < pasif[0].Count; b++)
+                                                    {
+                                                        <tr class="table-success font-weight-boldest text-decoration-underline">
+                                                            <td scope="col">@pasif[0].ElementAt(b).Key</td>
+
+                                                            @for (int p = 0; p < (pasif.Count) / 3; p++)
+                                                            {
+                                                                g = p * 3;
+                                                                <td scope="col" class="text-right"> @pasif[0 + g].ElementAt(b).Value</td>
+                                                                <td scope="col" class="text-center"> @pasif[1 + g].ElementAt(b).Value</td>
+                                                                <td scope="col" class="text-center"> @pasif[2 + g].ElementAt(b).Value</td>
+                                                            }
+                                                        </tr>
+                                                    }
+                                                </tbody>
+                                            </table>
+                                        }
+                                    </div>
+                                </div>
+                                <div class="footer">
+                                    <div>
+                                        <strong>Fintech</strong>  &copy; 2021
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="tab-pane fade" id="gelir" role="tabpanel" aria-labelledby="gelir-tab">
+                                <div class="row">
+                                    <h1 class=" text-left text-success">Gelir Tablosu</h1>
+                                </div>
+                                <div class="row">
+                                    <div class="col-lg-12">
+                                        @{
+
+                                            List<Dictionary<string, string>> gelir = ViewBag.gelir;
+
+                                            <table class="table table-hover">
+                                                <thead>
+                                                    <tr>
+                                                        <th>Hesap Adı</th>
+
+                                                        @for (int k = 0; k < (gelir.Count) / 2; k++)
+                                                        {
+                                                            r = k * 2;
+                                                            <th scope="col" style="text-align: end;"> @gelir[0 + r].ElementAt(3).Value </th>
+                                                            <th scope="col" class="text-center px-1" style="width: 80px; color: gray;"> @gelir[1 + r].ElementAt(3).Value  </th>
+
+
+                                                        }
+
+                                                    </tr>
+                                                </thead>
+                                                <tbody>
+
+                                                    @for (int k = 5; k < gelir[0].Count; k++)
+                                                    {
+                                                        <tr class="table-success font-weight-boldest text-decoration-underline">
+                                                            <td scope="col">@gelir[0].ElementAt(k).Key</td>
+
+                                                            @for (int j = 0; j < (gelir.Count) / 2; j++)
+                                                            {
+                                                                t = j * 2;
+                                                                <td scope="col" class="text-right"> @gelir[0 + t].ElementAt(k).Value</td>
+                                                                <td scope="col" class="text-center"> @gelir[1 + t].ElementAt(k).Value</td>
+                                                            }
+
+                                                        </tr>
+                                                    }
+
+                                                </tbody>
+                                            </table>
+                                        }
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="tab-pane fade" id="rasyo" role="tabpanel" aria-labelledby="rasyo-tab">
+                                <div class="row">
+                                    <h1 class=" text-left text-success">Rasyolar</h1>
+                                </div>
+                                <div class="row p-3">
+                                    <div class="col-lg-12">
+                                        <div class="ibox float-e-margins">
+                                            <div class="ibox-content">
+                                                <div class="panel blank-panel">
+                                                    <div class="panel-heading">
+                                                        <div class="panel-options">
+                                                            <ul class="nav nav-tabs  mb-3 mt-3" id="simpletab" role="tablist">
+                                                                <li class="nav-item active"><a class="nav-link" data-toggle="tab" href="#tab-11">LiKiDiTE ORANLARI</a></li>
+                                                                <li class="nav-item"><a class="nav-link" data-toggle="tab" href="#tab-21">FİNANSAL YAPI ORANLARI</a></li>
+                                                                <li class="nav-item"><a class="nav-link" data-toggle="tab" href="#tab-31">KALDIRAÇ ORANLAR</a></li>
+                                                                <li class="nav-item"><a class="nav-link" data-toggle="tab" href="#tab-41">MALi YAPI ORANLARI</a></li>
+                                                                <li class="nav-item"><a class="nav-link" data-toggle="tab" href="#tab-51">FAALiYET ORANLARI</a></li>
+                                                                <li class="nav-item"><a class="nav-link" data-toggle="tab" href="#tab-61">KARLILIK ORANLARI</a></li>
+                                                                <li class="nav-item"><a class="nav-link" data-toggle="tab" href="#tab-71">BÜYÜME ORANLARI</a></li>
+                                                                <li class="nav-item"><a class="nav-link" data-toggle="tab" href="#tab-81">YARDIMCI DEĞERLERİ</a></li>
+                                                                <li class="nav-item"><a class="nav-link" data-toggle="tab" href="#tab-91">KUR RİSKİ</a></li>
+                                                            </ul>
+                                                        </div>
+                                                    </div>
+                                                    <div class="panel-body">
+                                                        <div class="tab-content">
+                                                            <div id="tab-11" class="tab-pane active">
+                                                                <div class="row">
+                                                                    <table class="table table-borderless table align-middle table-hover fs-4">
+                                                                        <thead>
+                                                                            <tr>
+                                                                                <th>Rasyo Adı</th>
+                                                                                <th scope="col" class="text-center px-1" style="width: 160px; color: gray;"> @rasyo[0].Type</th>
+                                                                                @for (int k = 0; k < (rasyo.Count - 1); k++)
+                                                                                {
+                                                                                    <th scope="col" class="text-center px-1" style="width: 80px; color: gray;"> @rasyo[k + 1].Tarih</th>
+                                                                                }
+                                                                            </tr>
+                                                                        </thead>
+                                                                        <tbody>
+                                                                            <tr class="table-success font-weight-boldest text-decoration-underline">
+
+                                                                                <td scope="col">Cari Oran = Dönen Varlıklar / K.V. Borçlar</td>
+
+                                                                                @for (int k = 0; k < (rasyo.Count); k++)
+                                                                                {
+                                                                                    <td scope="col" class="text-center"> @rasyo[k].CariOran</td>
+                                                                                }
+
+                                                                            </tr>
+                                                                            <tr class="table-success font-weight-boldest text-decoration-underline">
+                                                                                <td scope="col">Asit - Test Oranı (Likidite Oranı) =(Hazır Değerler+Menkul Kıymetler (Net)+Ticari Alacaklar+Mamuller+Ticari Mallar)/Kısa Vadeli Yabancı Kaynaklar)</td>
+
+                                                                                @for (int k = 0; k < (rasyo.Count); k++)
+                                                                                {
+                                                                                    <td scope="col" class="text-center"> @rasyo[k].LikiditeOrani</td>
+                                                                                }
+
+                                                                            </tr>
+                                                                            <tr class="table-success font-weight-boldest text-decoration-underline">
+                                                                                <td scope="col">Nakit Oranı = ( Hazır Değerler + Menkul Kıymetler ) / K.V. Borçlar</td>
+
+                                                                                @for (int k = 0; k < (rasyo.Count); k++)
+                                                                                {
+                                                                                    <td scope="col" class="text-center"> @rasyo[k].NakitOrani</td>
+                                                                                }
+                                                                            </tr>
+                                                                            <tr class="table-success font-weight-boldest text-decoration-underline">
+
+                                                                                <td scope="col">Net işletme Sermayesi - Aktifler Oranı = ( Net işletme Sermayesi /Toplam Aktifler ) * 100</td>
+                                                                                @for (int k = 0; k < (rasyo.Count); k++)
+                                                                                {
+                                                                                    <td scope="col" class="text-center"> @rasyo[k].NetIslSer_AO</td>
+                                                                                }
+
+                                                                            </tr>
+                                                                            <tr class="table-success font-weight-boldest text-decoration-underline">
+
+                                                                                <td scope="col">Likit Aktifler - Aktifler Oranı = (Dönen varlıklar-Diğer dönen varlıklar-Stoklar) / Aktifler toplamı</td>
+
+                                                                                @for (int k = 0; k < (rasyo.Count); k++)
+                                                                                {
+                                                                                    <td scope="col" class="text-center"> @rasyo[k].LikAkt_AktOr</td>
+                                                                                }
+                                                                            </tr>
+                                                                        </tbody>
+                                                                    </table>
+                                                                </div>
+                                                            </div>
+                                                            <div id="tab-21" class="tab-pane fade">
+                                                                <div class="row">
+                                                                    <table class="table table-borderless table align-middle table-hover fs-4">
+                                                                        <thead>
+                                                                            <tr>
+                                                                                <th>Rasyo Adı</th>
+                                                                                <th scope="col" class="text-center px-1" style="width: 160px; color: gray;"> @rasyo[0].Type</th>
+
+                                                                                @for (int k = 0; k < (rasyo.Count - 1); k++)
+                                                                                {
+
+                                                                                    <th scope="col" class="text-center px-1" style="width: 80px; color: gray;"> @rasyo[k + 1].Tarih</th>
+
+                                                                                }
+
+                                                                            </tr>
+                                                                        </thead>
+                                                                        <tbody>
+                                                                            <tr class="table-success font-weight-boldest text-decoration-underline">
+
+                                                                                <td scope="col">Brüt Finansal Borç/FAVÖK</td>
+
+                                                                                @for (int k = 0; k < (rasyo.Count); k++)
+                                                                                {
+                                                                                    <td scope="col" class="text-center"> @rasyo[k].BrutKarMarji</td>
+                                                                                }
+
+                                                                            </tr>
+                                                                            <tr class="table-success font-weight-boldest text-decoration-underline">
+
+                                                                                <td scope="col">Net Finansal Borç/FAVÖK</td>
+
+                                                                                @for (int k = 0; k < (rasyo.Count); k++)
+                                                                                {
+                                                                                    <td scope="col" class="text-center"> @rasyo[k].NetFinansalBorc_FAVÖK</td>
+                                                                                }
+
+                                                                            </tr>
+                                                                            <tr class="table-success font-weight-boldest text-decoration-underline">
+
+                                                                                <td scope="col">Kısa Vadeli Yabancı Kaynaklar/Özkaynaklar</td>
+
+                                                                                @for (int k = 0; k < (rasyo.Count); k++)
+                                                                                {
+                                                                                    <td scope="col" class="text-center"> @rasyo[k].KisaVadeliYabanciKaynaklar_Ozkaynaklar</td>
+                                                                                }
+
+                                                                            </tr>
+                                                                            <tr class="table-success font-weight-boldest text-decoration-underline">
+
+                                                                                <td scope="col">Öz Kaynaklar/Aktifler Toplamı</td>
+
+                                                                                @for (int k = 0; k < (rasyo.Count); k++)
+                                                                                {
+                                                                                    <td scope="col" class="text-center"> @rasyo[k].OzKaynaklar_AktiflerToplami</td>
+                                                                                }
+
+                                                                            </tr>
+                                                                            <tr class="table-success font-weight-boldest text-decoration-underline">
+
+                                                                                <td scope="col">Interest Coverage Ratio = FAVÖK (EBITDA) / Finansman Giderleri</td>
+
+                                                                                @for (int k = 0; k < (rasyo.Count); k++)
+                                                                                {
+                                                                                    <td scope="col" class="text-center"> @rasyo[k].InterestCoverageRatio</td>
+                                                                                }
+
+                                                                            </tr>
+                                                                        </tbody>
+                                                                    </table>
+                                                                </div>
+                                                            </div>
+                                                            <div id="tab-31" class="tab-pane fade">
+                                                                <div class="row">
+                                                                    <table class="table table-borderless table align-middle table-hover fs-4">
+                                                                        <thead>
+                                                                            <tr>
+                                                                                <th>Rasyo Adı</th>
+                                                                                <th scope="col" class="text-center px-1" style="width: 160px; color: gray;"> @rasyo[0].Type</th>
+
+                                                                                @for (int k = 0; k < (rasyo.Count - 1); k++)
+                                                                                {
+
+                                                                                    <th scope="col" class="text-center px-1" style="width: 80px; color: gray;"> @rasyo[k + 1].Tarih</th>
+
+                                                                                }
+
+                                                                            </tr>
+                                                                        </thead>
+                                                                        <tbody>
+                                                                            <tr class="table-success font-weight-boldest text-decoration-underline">
+
+                                                                                <td scope="col">Finansal Kaldıraç (Borç - Aktifler Oranı) = [( U.V. Borçlar + K.V. Borçlar ) / Toplam Aktifler ] * 100</td>
+
+                                                                                @for (int k = 0; k < (rasyo.Count); k++)
+                                                                                {
+                                                                                    <td scope="col" class="text-center"> @rasyo[k].FinansalKaldirac</td>
+                                                                                }
+
+                                                                            </tr>
+                                                                            <tr class="table-success font-weight-boldest text-decoration-underline">
+
+                                                                                <td scope="col">Borçlanma Katsayısı (Borç - Öz Sermaye Oranı) = [( U.V. Borçlar + K.V. Borçlar ) / Öz Sermaye ] * 100</td>
+
+                                                                                @for (int k = 0; k < (rasyo.Count); k++)
+                                                                                {
+                                                                                    <td scope="col" class="text-center"> @rasyo[k].BorclanmaKatsayisi</td>
+                                                                                }
+
+                                                                            </tr>
+                                                                            <tr class="table-success font-weight-boldest text-decoration-underline">
+
+                                                                                <td scope="col">Öz Sermaye Çarpanı = ( Toplam Aktifler / Öz Sermaye ) * 100</td>
+
+                                                                                @for (int k = 0; k < (rasyo.Count); k++)
+                                                                                {
+                                                                                    <td scope="col" class="text-center"> @rasyo[k].OzSermayeCarpani</td>
+                                                                                }
+
+                                                                            </tr>
+                                                                            <tr class="table-success font-weight-boldest text-decoration-underline">
+
+                                                                                <td scope="col">Kısa Vadeli Borçlar - Aktifler Oranı = ( K.V. Borçlar / Toplam Aktifler ) * 100</td>
+
+                                                                                @for (int k = 0; k < (rasyo.Count); k++)
+                                                                                {
+                                                                                    <td scope="col" class="text-center"> @rasyo[k].KisVadBorc_AktOr</td>
+                                                                                }
+
+                                                                            </tr>
+                                                                            <tr class="table-success font-weight-boldest text-decoration-underline">
+
+                                                                                <td scope="col">Borç Yapısı Oranı (K.V. Borçlar - Toplam Borçlar) = [ K.V. Borçlar / ( U.V. Borçlar + K.V. Borçlar )] * 100</td>
+
+                                                                                @for (int k = 0; k < (rasyo.Count); k++)
+                                                                                {
+                                                                                    <td scope="col" class="text-center"> @rasyo[k].BorcYapisiOrani</td>
+                                                                                }
+
+                                                                            </tr>
+                                                                            <tr class="table-success font-weight-boldest text-decoration-underline">
+
+                                                                                <td scope="col">Uzun Vadeli Borçlar - Aktifler Oranı = ( U.V. Borçlar / Toplam Aktifler ) * 100</td>
+
+                                                                                @for (int k = 0; k < (rasyo.Count); k++)
+                                                                                {
+                                                                                    <td scope="col" class="text-center"> @rasyo[k].UzVadBor_AktOr</td>
+                                                                                }
+
+                                                                            </tr>
+                                                                            <tr class="table-success font-weight-boldest text-decoration-underline">
+
+                                                                                <td scope="col">Uzun Vadeli Borçlar - Devamlı Sermaye Oranı = DURAN VARLIKLAR/(UZUN VADELİ YABANCI KAYNAKLAR+ÖZKAYNAKLAR)</td>
+
+                                                                                @for (int k = 0; k < (rasyo.Count); k++)
+                                                                                {
+                                                                                    <td scope="col" class="text-center"> @rasyo[k].UzvadBorc_DevSerOr</td>
+                                                                                }
+
+                                                                            </tr>
+                                                                            <tr class="table-success font-weight-boldest text-decoration-underline">
+
+                                                                                <td scope="col">Finansal Borçlar - Aktifler Oranı = [( U.V. Finansal Borçlar + K.V. Finansal Borçlar ) / Toplam Aktifler ] * 100</td>
+
+                                                                                @for (int k = 0; k < (rasyo.Count); k++)
+                                                                                {
+                                                                                    <td scope="col" class="text-center"> @rasyo[k].FinBorc_AktOr</td>
+                                                                                }
+
+                                                                            </tr>
+                                                                            <tr class="table-success font-weight-boldest text-decoration-underline">
+
+                                                                                <td scope="col">Sermaye - Öz Sermaye Oranı = ( Sermaye / Öz Sermaye ) * 100</td>
+
+                                                                                @for (int k = 0; k < (rasyo.Count); k++)
+                                                                                {
+                                                                                    <td scope="col" class="text-center"> @rasyo[k].Ser_OzSerOr</td>
+                                                                                }
+
+                                                                            </tr>
+                                                                        </tbody>
+                                                                    </table>
+                                                                </div>
+                                                            </div>
+                                                            <div id="tab-41" class="tab-pane fade">
+                                                                <div class="row">
+                                                                    <table class="table table-borderless table align-middle table-hover fs-4">
+                                                                        <thead>
+                                                                            <tr>
+                                                                                <th>Rasyo Adı</th>
+                                                                                <th scope="col" class="text-center px-1" style="width: 160px; color: gray;"> @rasyo[0].Type</th>
+
+                                                                                @for (int k = 0; k < (rasyo.Count - 1); k++)
+                                                                                {
+
+                                                                                    <th scope="col" class="text-center px-1" style="width: 80px; color: gray;"> @rasyo[k + 1].Tarih</th>
+
+                                                                                }
+
+                                                                            </tr>
+                                                                        </thead>
+                                                                        <tbody>
+                                                                            <tr class="table-success font-weight-boldest text-decoration-underline">
+
+                                                                                <td scope="col">Maddi Duran Varlıklar - Öz Sermaye Oranı = ( Maddi Duran Varlıklar / Öz Sermaye ) * 100</td>
+
+                                                                                @for (int k = 0; k < (rasyo.Count); k++)
+                                                                                {
+                                                                                    <td scope="col" class="text-center"> @rasyo[k].MadDuranVar_OzSerOr</td>
+                                                                                }
+
+                                                                            </tr>
+                                                                            <tr class="table-success font-weight-boldest text-decoration-underline">
+
+                                                                                <td scope="col">Duran Varlıklar - Devamlı Sermaye Oranı = ( Duran Varlıklar / Devamlı Sermaye ) * 100</td>
+
+                                                                                @for (int k = 0; k < (rasyo.Count); k++)
+                                                                                {
+                                                                                    <td scope="col" class="text-center"> @rasyo[k].DurVar_DevSerOr</td>
+                                                                                }
+
+                                                                            </tr>
+                                                                            <tr class="table-success font-weight-boldest text-decoration-underline">
+
+                                                                                <td scope="col">
+                                                                                    Maddi Duran Varlıklar - Devamlı Sermaye Oranı = ( Maddi Duran Varlıklar / Devamlı Sermaye ) * 100
+                                                                                </td>
+
+                                                                                @for (int k = 0; k < (rasyo.Count); k++)
+                                                                                {
+                                                                                    <td scope="col" class="text-center"> @rasyo[k].MadDurVar_DevSerOr</td>
+                                                                                }
+
+                                                                            </tr>
+                                                                            <tr class="table-success font-weight-boldest text-decoration-underline">
+
+                                                                                <td scope="col">Duran Varlıklar - Öz Sermaye Oranı = ( Duran Varlıklar / Öz Sermaye ) * 100</td>
+
+                                                                                @for (int k = 0; k < (rasyo.Count); k++)
+                                                                                {
+                                                                                    <td scope="col" class="text-center"> @rasyo[k].DurVar_OzSerOr</td>
+                                                                                }
+
+                                                                            </tr>
+                                                                            <tr class="table-success font-weight-boldest text-decoration-underline">
+
+                                                                                <td scope="col">Finansal Duran Varlıklar - Duran Varlıklar Oranı = MALİ DURAN VARLIKLAR/DURAN VARLIKLAR</td>
+
+                                                                                @for (int k = 0; k < (rasyo.Count); k++)
+                                                                                {
+                                                                                    <td scope="col" class="text-center"> @rasyo[k].FinDurVar_DevSerOr</td>
+                                                                                }
+
+                                                                            </tr>
+                                                                            <tr class="table-success font-weight-boldest text-decoration-underline">
+
+                                                                                <td scope="col">Finansal Duran Varlıklar - Devamlı Sermaye Oranı = ( Finansal Duran Varlıklar / Devamlı Sermaye ) * 100</td>
+
+                                                                                @for (int k = 0; k < (rasyo.Count); k++)
+                                                                                {
+                                                                                    <td scope="col" class="text-center"> @rasyo[k].FinDurVar_DevSerOr</td>
+                                                                                }
+
+                                                                            </tr>
+                                                                        </tbody>
+                                                                    </table>
+                                                                </div>
+                                                            </div>
+                                                            <div id="tab-51" class="tab-pane fade">
+                                                                <div class="row">
+                                                                    <table class="table table-borderless table align-middle table-hover fs-4">
+                                                                        <thead>
+                                                                            <tr>
+                                                                                <th>Rasyo Adı</th>
+                                                                                <th scope="col" class="text-center px-1" style="width: 160px; color: gray;"> @rasyo[0].Type</th>
+
+                                                                                @for (int k = 0; k < (rasyo.Count - 1); k++)
+                                                                                {
+
+                                                                                    <th scope="col" class="text-center px-1" style="width: 80px; color: gray;"> @rasyo[k + 1].Tarih</th>
+
+                                                                                }
+
+                                                                            </tr>
+                                                                        </thead>
+                                                                        <tbody>
+                                                                            <tr class="table-success font-weight-boldest text-decoration-underline">
+
+                                                                                <td scope="col">Alacak Tahsil Süresi (Gün) = 360/ Alacak Devir hızı</td>
+
+                                                                                @for (int k = 0; k < (rasyo.Count); k++)
+                                                                                {
+                                                                                    <td scope="col" class="text-center"> @rasyo[k].AlacakTahsilSuresi</td>
+                                                                                }
+
+                                                                            </tr>
+                                                                            <tr class="table-success font-weight-boldest text-decoration-underline">
+
+                                                                                <td scope="col">Borç Ödeme Süresi (Gün) = 360/Borç Devir hızı</td>
+
+                                                                                @for (int k = 0; k < (rasyo.Count); k++)
+                                                                                {
+                                                                                    <td scope="col" class="text-center"> @rasyo[k].BorcOdemeSuresi</td>
+                                                                                }
+
+                                                                            </tr>
+                                                                            <tr class="table-success font-weight-boldest text-decoration-underline">
+
+                                                                                <td scope="col">Stok Devir Süresi (Gün) = 360 /Stok Devir Hızı</td>
+
+                                                                                @for (int k = 0; k < (rasyo.Count); k++)
+                                                                                {
+                                                                                    <td scope="col" class="text-center"> @rasyo[k].StokDevirSuresi</td>
+                                                                                }
+
+                                                                            </tr>
+                                                                            <tr class="table-success font-weight-boldest text-decoration-underline">
+
+                                                                                <td scope="col">Alacak Devir Hızı = Net Satışlar / Ticari Alacaklar</td>
+
+                                                                                @for (int k = 0; k < (rasyo.Count); k++)
+                                                                                {
+                                                                                    <td scope="col" class="text-center"> @rasyo[k].AlacakDevirHizi</td>
+                                                                                }
+
+                                                                            </tr>
+                                                                            <tr class="table-success font-weight-boldest text-decoration-underline">
+
+                                                                                <td scope="col">Alacakların Ortalama Tahsil Suresi = (360* TİCARİ ALACAKLAR) / Net Satışlar</td>
+
+                                                                                @for (int k = 0; k < (rasyo.Count); k++)
+                                                                                {
+                                                                                    <td scope="col" class="text-center"> @rasyo[k].AlacaklarinOrtalamaTahsilSuresi</td>
+                                                                                }
+
+                                                                            </tr>
+                                                                            <tr class="table-success font-weight-boldest text-decoration-underline">
+
+                                                                                <td scope="col">Stok Devir Hızı = Satılan Malın Maliyeti / Stoklar</td>
+
+                                                                                @for (int k = 0; k < (rasyo.Count); k++)
+                                                                                {
+                                                                                    <td scope="col" class="text-center"> @rasyo[k].StokDevirHizi</td>
+                                                                                }
+
+                                                                            </tr>
+                                                                            <tr class="table-success font-weight-boldest text-decoration-underline">
+
+                                                                                <td scope="col">Stokların Ortalama Tuketilme Suresi = 365* Stoklar / Satışların maaliyeti</td>
+
+                                                                                @for (int k = 0; k < (rasyo.Count); k++)
+                                                                                {
+                                                                                    <td scope="col" class="text-center"> @rasyo[k].StoklarinOrtalamaTuketilmeSuresi</td>
+                                                                                }
+
+                                                                            </tr>
+                                                                            <tr class="table-success font-weight-boldest text-decoration-underline">
+
+                                                                                <td scope="col">Etkinlik Suresi = Alacakların Ort. Tahsil Suresi + Stokların Ort. Tuketilme Suresi</td>
+
+                                                                                @for (int k = 0; k < (rasyo.Count); k++)
+                                                                                {
+                                                                                    <td scope="col" class="text-center"> @rasyo[k].EtkinlikSuresi</td>
+                                                                                }
+
+                                                                            </tr>
+                                                                            <tr class="table-success font-weight-boldest text-decoration-underline">
+
+                                                                                <td scope="col">Ticari Borçlar Devir Hızı = Satılan Malın Maliyeti / Ticari Borçlar</td>
+
+                                                                                @for (int k = 0; k < (rasyo.Count); k++)
+                                                                                {
+                                                                                    <td scope="col" class="text-center"> @rasyo[k].TicariBorclarDevirHizi</td>
+                                                                                }
+
+                                                                            </tr>
+                                                                            <tr class="table-success font-weight-boldest text-decoration-underline">
+
+                                                                                <td scope="col">Ticari Borçları Ödeme Suresi = ( 365 * Ortalama Ticari Borçlar ) / Satılan Malın Maliyeti</td>
+
+                                                                                @for (int k = 0; k < (rasyo.Count); k++)
+                                                                                {
+                                                                                    <td scope="col" class="text-center"> @rasyo[k].TicariBorclariOdemeSuresi</td>
+                                                                                }
+
+                                                                            </tr>
+                                                                            <tr class="table-success font-weight-boldest text-decoration-underline">
+
+                                                                                <td scope="col">Nakit Çevirme Suresi = Etkinlik Suresi - Ticari Borçları Ödeme Suresi</td>
+
+                                                                                @for (int k = 0; k < (rasyo.Count); k++)
+                                                                                {
+                                                                                    <td scope="col" class="text-center"> @rasyo[k].NakitCevirmeSuresi</td>
+                                                                                }
+
+                                                                            </tr>
+                                                                            <tr class="table-success font-weight-boldest text-decoration-underline">
+
+                                                                                <td scope="col">Net işletme Sermayesi Devir Hızı = Net Satışlar /(Dönen varlıkar -kısa vadeli YK)</td>
+
+                                                                                @for (int k = 0; k < (rasyo.Count); k++)
+                                                                                {
+                                                                                    <td scope="col" class="text-center"> @rasyo[k].NetIsletmeSermayesiDevirHizi</td>
+                                                                                }
+
+                                                                            </tr>
+                                                                            <tr class="table-success font-weight-boldest text-decoration-underline">
+
+                                                                                <td scope="col">Dönen Varlıklar ( Brut işletme Sermayesi ) Devir Hızı = Net Satışlar / Dönen Varlıklar</td>
+
+                                                                                @for (int k = 0; k < (rasyo.Count); k++)
+                                                                                {
+                                                                                    <td scope="col" class="text-center">@rasyo[k].DonenVarliklarDevirHizi</td>
+                                                                                }
+
+                                                                            </tr>
+                                                                            <tr class="table-success font-weight-boldest text-decoration-underline">
+
+                                                                                <td scope="col">Maddi Duran Varlıklar Devir Hızı = Net Satışlar / Maddi Duran Varlıklar</td>
+
+                                                                                @for (int k = 0; k < (rasyo.Count); k++)
+                                                                                {
+                                                                                    <td scope="col" class="text-center"> @rasyo[k].MaddiDuranVarliklarDevirHizi</td>
+                                                                                }
+
+                                                                            </tr>
+                                                                            <tr class="table-success font-weight-boldest text-decoration-underline">
+
+                                                                                <td scope="col">Aktif Toplamı Devir Hızı = Net Satışlar / Toplam Aktifler</td>
+
+                                                                                @for (int k = 0; k < (rasyo.Count); k++)
+                                                                                {
+                                                                                    <td scope="col" class="text-center"> @rasyo[k].AktifToplamiDevirHizi</td>
+                                                                                }
+
+                                                                            </tr>
+                                                                            <tr class="table-success font-weight-boldest text-decoration-underline">
+
+                                                                                <td scope="col">Öz Sermaye Devir Hızı = Net Satışlar / Öz Sermaye</td>
+
+                                                                                @for (int k = 0; k < (rasyo.Count); k++)
+                                                                                {
+                                                                                    <td scope="col" class="text-center"> @rasyo[k].OzSermayeDevirHizi</td>
+                                                                                }
+
+                                                                            </tr>
+                                                                            <tr class="table-success font-weight-boldest text-decoration-underline">
+
+                                                                                <td scope="col">Devamlı Sermaye Devir Hızı = Net Satışlar / Devamlı Sermaye</td>
+
+                                                                                @for (int k = 0; k < (rasyo.Count); k++)
+                                                                                {
+                                                                                    <td scope="col" class="text-center"> @rasyo[k].DevamliSermayeDevirHizi</td>
+                                                                                }
+
+                                                                            </tr>
+                                                                            <tr class="table-success font-weight-boldest text-decoration-underline">
+
+                                                                                <td scope="col">Sermaye Devir Hızı = Net Satışlar / Ödenmiş Sermaye</td>
+
+                                                                                @for (int k = 0; k < (rasyo.Count); k++)
+                                                                                {
+                                                                                    <td scope="col" class="text-center"> @rasyo[k].SermayeDevirHizi</td>
+                                                                                }
+
+                                                                            </tr>
+                                                                        </tbody>
+                                                                    </table>
+                                                                </div>
+                                                            </div>
+                                                            <div id="tab-61" class="tab-pane fade">
+                                                                <div class="row">
+                                                                    <table class="table table-borderless table align-middle table-hover fs-4">
+                                                                        <thead>
+                                                                            <tr>
+                                                                                <th>Rasyo Adı</th>
+                                                                                <th scope="col" class="text-center px-1" style="width: 160px; color: gray;"> @rasyo[0].Type</th>
+
+                                                                                @for (int k = 0; k < (rasyo.Count - 1); k++)
+                                                                                {
+
+                                                                                    <th scope="col" class="text-center px-1" style="width: 80px; color: gray;"> @rasyo[k + 1].Tarih</th>
+
+                                                                                }
+
+                                                                            </tr>
+                                                                        </thead>
+                                                                        <tbody>
+                                                                            <tr class="table-success font-weight-boldest text-decoration-underline">
+                                                                                <td scope="col">Brut Kar Marjı = ( Brut Satış Karı / Net Satışlar ) * 100</td>
+
+                                                                                @for (int k = 0; k < (rasyo.Count); k++)
+                                                                                {
+                                                                                    <td scope="col" class="text-center"> @rasyo[k].BrutKarMarji</td>
+                                                                                }
+
+                                                                            </tr>
+                                                                            <tr class="table-success font-weight-boldest text-decoration-underline">
+
+                                                                                <td scope="col">Net Kar Marjı = EBITDA marjı= EBITDA/Net satışlar</td>
+
+                                                                                @for (int k = 0; k < (rasyo.Count); k++)
+                                                                                {
+                                                                                    <td scope="col" class="text-center"> @rasyo[k].EBITDA_Marji</td>
+                                                                                }
+
+                                                                            </tr>
+                                                                            <tr class="table-success font-weight-boldest text-decoration-underline">
+
+                                                                                <td scope="col">Net Kar Marjı= Net Kar/Net Satışlar</td>
+
+                                                                                @for (int k = 0; k < (rasyo.Count); k++)
+                                                                                {
+                                                                                    <td scope="col" class="text-center"> @rasyo[k].NetKarMarji</td>
+                                                                                }
+
+                                                                            </tr>
+                                                                            <tr class="table-success font-weight-boldest text-decoration-underline">
+
+                                                                                <td scope="col">Esas Faaliyet Karlılığı = ( Faaliyet Karı / Net Satışlar ) * 100</td>
+
+                                                                                @for (int k = 0; k < (rasyo.Count); k++)
+                                                                                {
+                                                                                    <td scope="col" class="text-center"> @rasyo[k].EsasFaaliyetKarliligi</td>
+                                                                                }
+
+                                                                            </tr>
+                                                                            <tr class="table-success font-weight-boldest text-decoration-underline">
+
+                                                                                <td scope="col">Faaliyet Karlılığı = ( Olağan Kar / Net Satışlar ) * 100</td>
+
+                                                                                @for (int k = 0; k < (rasyo.Count); k++)
+                                                                                {
+                                                                                    <td scope="col" class="text-center"> @rasyo[k].FaaliyetKarliligi</td>
+                                                                                }
+
+                                                                            </tr>
+                                                                            <tr class="table-success font-weight-boldest text-decoration-underline">
+
+                                                                                <td scope="col">Faiz ve Vergi Öncesi Kar Marjı = (Dönem karı zarar+Finansman Giderleri)/Net Satışlar</td>
+
+                                                                                @for (int k = 0; k < (rasyo.Count); k++)
+                                                                                {
+                                                                                    <td scope="col" class="text-center"> @rasyo[k].FaizveVergiOncesiKarMarji</td>
+                                                                                }
+
+                                                                            </tr>
+                                                                            <tr class="table-success font-weight-boldest text-decoration-underline">
+
+                                                                                <td scope="col">Vergi - Net Satışlar Oranı = ( Ödenecek Vergi ve Yasal Yukumlulukler / Net Satışlar ) * 100</td>
+
+                                                                                @for (int k = 0; k < (rasyo.Count); k++)
+                                                                                {
+                                                                                    <td scope="col" class="text-center"> @rasyo[k].Vergi_NetSatisOrani</td>
+                                                                                }
+
+                                                                            </tr>
+                                                                            <tr class="table-success font-weight-boldest text-decoration-underline">
+
+                                                                                <td scope="col">Vergi - Dönem Karı Oranı = ( Ödenecek Vergi ve Yasal Yukumlulukler / Dönem Karı ) * 100</td>
+
+                                                                                @for (int k = 0; k < (rasyo.Count); k++)
+                                                                                {
+                                                                                    <td scope="col" class="text-center"> @rasyo[k].VergiDonemKariOrani</td>
+                                                                                }
+
+                                                                            </tr>
+                                                                            <tr class="table-success font-weight-boldest text-decoration-underline">
+
+                                                                                <td scope="col">Öz Sermaye Kar Marjı = ( Net Kar / Öz Sermaye ) * 100</td>
+
+                                                                                @for (int k = 0; k < (rasyo.Count); k++)
+                                                                                {
+                                                                                    <td scope="col" class="text-center"> @rasyo[k].OzSerKarMar</td>
+                                                                                }
+
+                                                                            </tr>
+                                                                            <tr class="table-success font-weight-boldest text-decoration-underline">
+
+                                                                                <td scope="col">Devamlı Sermaye Kar Marjı = ( Net Kar / Devamlı Sermaye ) * 100</td>
+
+                                                                                @for (int k = 0; k < (rasyo.Count); k++)
+                                                                                {
+                                                                                    <td scope="col" class="text-center"> @rasyo[k].DevamliSermayeKarMarji</td>
+                                                                                }
+
+                                                                            </tr>
+                                                                            <tr class="table-success font-weight-boldest text-decoration-underline">
+
+                                                                                <td scope="col">Aktif Kar Marjı = ( Net Kar / Toplam Aktifler ) * 100</td>
+
+                                                                                @for (int k = 0; k < (rasyo.Count); k++)
+                                                                                {
+                                                                                    <td scope="col" class="text-center"> @rasyo[k].AktifKarMarji</td>
+                                                                                }
+
+                                                                            </tr>
+                                                                        </tbody>
+                                                                    </table>
+                                                                </div>
+                                                            </div>
+                                                            <div id="tab-71" class="tab-pane fade">
+                                                                <div class="row">
+                                                                    <table class="table table-borderless table align-middle table-hover fs-4">
+                                                                        <thead>
+                                                                            <tr>
+                                                                                <th>Rasyo Adı</th>
+                                                                                <th scope="col" class="text-center px-1" style="width: 160px; color: gray;"> @rasyo[0].Type</th>
+
+                                                                                @for (int k = 0; k < (rasyo.Count - 1); k++)
+                                                                                {
+
+                                                                                    <th scope="col" class="text-center px-1" style="width: 80px; color: gray;"> @rasyo[k + 1].Tarih</th>
+
+                                                                                }
+
+                                                                            </tr>
+                                                                        </thead>
+                                                                        <tbody>
+                                                                            <tr class="table-success font-weight-boldest text-decoration-underline">
+                                                                                <td scope="col">Devamlı Sermaye Buyume Oranı = [( Devamlı Sermaye(t) / Devamlı Sermaye(t-1) ) - 1 ] * 100</td>
+
+                                                                                @for (int k = 0; k < (rasyo.Count); k++)
+                                                                                {
+                                                                                    <td scope="col" class="text-center"> @rasyo[k].DevamliSermayeBuyumeOrani</td>
+                                                                                }
+
+                                                                            </tr>
+                                                                            <tr class="table-success font-weight-boldest text-decoration-underline">
+
+                                                                                <td scope="col">Net Kar Buyume Oranı = [( Net Dönem Karı(t) / Net Dönem Karı(t-1) ) - 1 ] * 100</td>
+
+                                                                                @for (int k = 0; k < (rasyo.Count); k++)
+                                                                                {
+                                                                                    <td scope="col" class="text-center"> @rasyo[k].NetKarBuyumeOrani</td>
+                                                                                }
+
+                                                                            </tr>
+                                                                            <tr class="table-success font-weight-boldest text-decoration-underline">
+
+                                                                                <td scope="col">Net Satışlar Buyume Oranı = [( Net Satışlar(t) / Net Satışlar(t-1) ) - 1 ] * 100</td>
+
+                                                                                @for (int k = 0; k < (rasyo.Count); k++)
+                                                                                {
+                                                                                    <td scope="col" class="text-center"> @rasyo[k].NetSatislarBuyumeOrani</td>
+                                                                                }
+
+                                                                            </tr>
+                                                                            <tr class="table-success font-weight-boldest text-decoration-underline">
+
+                                                                                <td scope="col">Net işletme Sermayesi Buyume Oranı = [( Net işletme Sermayesi(t) / Net işletme Sermayesi(t-1) ) - 1 ] * 100</td>
+
+                                                                                @for (int k = 0; k < (rasyo.Count); k++)
+                                                                                {
+                                                                                    <td scope="col" class="text-center"> @rasyo[k].NetIsletmeSermayesiBuyumeOrani</td>
+                                                                                }
+
+                                                                            </tr>
+                                                                            <tr class="table-success font-weight-boldest text-decoration-underline">
+
+                                                                                <td scope="col">Aktifler Buyume Oranı = [( Aktif Toplamı(t) / Aktif Toplamı(t-1) ) - 1 ] * 100</td>
+
+                                                                                @for (int k = 0; k < (rasyo.Count); k++)
+                                                                                {
+                                                                                    <td scope="col" class="text-center"> @rasyo[k].NetSatislarBuyumeOrani</td>
+                                                                                }
+
+                                                                            </tr>
+                                                                            <tr class="table-success font-weight-boldest text-decoration-underline">
+
+                                                                                <td scope="col">Öz Sermaye Buyume Oranı = [( Öz Sermaye(t) / Öz Sermaye(t-1) ) - 1 ] * 100</td>
+
+                                                                                @for (int k = 0; k < (rasyo.Count); k++)
+                                                                                {
+                                                                                    <td scope="col" class="text-center"> @rasyo[k].OzSermayeBuyumeOrani</td>
+                                                                                }
+
+                                                                            </tr>
+                                                                        </tbody>
+                                                                    </table>
+                                                                </div>
+                                                            </div>
+                                                            <div id="tab-81" class="tab-pane fade">
+                                                                <div class="row">
+                                                                    <table class="table table-borderless table align-middle table-hover fs-4">
+                                                                        <thead>
+                                                                            <tr>
+                                                                                <th>Rasyo Adı</th>
+                                                                                <th scope="col" class="text-center px-1" style="width: 160px; color: gray;"> @rasyo[0].Type</th>
+
+                                                                                @for (int k = 0; k < (rasyo.Count - 1); k++)
+                                                                                {
+
+                                                                                    <th scope="col" class="text-center px-1" style="width: 80px; color: gray;"> @rasyo[k + 1].Tarih</th>
+
+                                                                                }
+
+                                                                            </tr>
+                                                                        </thead>
+                                                                        <tbody>
+                                                                            <tr class="table-success font-weight-boldest text-decoration-underline">
+
+                                                                                <td scope="col">Net işletme Sermayesi = Dönen Varlıklar - K.V. Borçlar</td>
+
+                                                                                @for (int k = 0; k < (rasyo.Count); k++)
+                                                                                {
+                                                                                    <td scope="col" class="text-center"> @rasyo[k].NetisletmeSermayesi</td>
+                                                                                }
+
+                                                                            </tr>
+                                                                            <tr class="table-success font-weight-boldest text-decoration-underline">
+
+                                                                                <td scope="col">Likit Hızlı Aktifler = Dönen Varlıklar - Stoklar - Diğer Dönen Varlıklar</td>
+
+                                                                                @for (int k = 0; k < (rasyo.Count); k++)
+                                                                                {
+                                                                                    <td scope="col" class="text-center"> @rasyo[k].LikitHizliAktifler</td>
+                                                                                }
+
+                                                                            </tr>
+                                                                            <tr class="table-success font-weight-boldest text-decoration-underline">
+
+                                                                                <td scope="col">Net Finansal Borç (NFB)= ((-1)*(Hazır Değerler+Menkul Kıymetler)+(U.V Mali Borçlar + K.V Mali Borçlar))</td>
+
+                                                                                @for (int k = 0; k < (rasyo.Count); k++)
+                                                                                {
+                                                                                    <td scope="col" class="text-center">@rasyo[k].NetFinansalBorc_NFB</td>
+                                                                                }
+
+                                                                            </tr>
+                                                                            <tr class="table-success font-weight-boldest text-decoration-underline">
+
+                                                                                <td scope="col">Brüt Finansal Borç = U.V Mali Borçlar + K.V Mali Borçlar</td>
+
+                                                                                @for (int k = 0; k < (rasyo.Count); k++)
+                                                                                {
+                                                                                    <td scope="col" class="text-center"> @rasyo[k].BrutFinansalBorc</td>
+                                                                                }
+
+                                                                            </tr>
+                                                                            <tr class="table-success font-weight-boldest text-decoration-underline">
+
+                                                                                <td scope="col">FAVÖK (EBITDA) = Faaliyet Karı veya Zararı + (Birikmiş Amortismanlar(-) Önceki Yıl - Cari Yıl Birikmiş Amortismanlar(-) )</td>
+
+                                                                                @for (int k = 0; k < (rasyo.Count); k++)
+                                                                                {
+                                                                                    <td scope="col" class="text-center"> @rasyo[k].FAVÖK_EBITDA</td>
+                                                                                }
+
+                                                                            </tr>
+                                                                            <tr class="table-success font-weight-boldest text-decoration-underline">
+
+                                                                                <td scope="col">Toplam Varlıklar = Aktifler Toplamı</td>
+
+                                                                                @for (int k = 0; k < (rasyo.Count); k++)
+                                                                                {
+                                                                                    <td scope="col" class="text-center"> @rasyo[k].ToplamVarliklar</td>
+                                                                                }
+
+                                                                            </tr>
+                                                                            <tr class="table-success font-weight-boldest text-decoration-underline">
+
+                                                                                <td scope="col">Özkaynak = Özkaynak</td>
+
+                                                                                @for (int k = 0; k < (rasyo.Count); k++)
+                                                                                {
+                                                                                    <td scope="col" class="text-center"> @rasyo[k].Ozkaynak_Ozkaynak</td>
+                                                                                }
+
+                                                                            </tr>
+                                                                            <tr class="table-success font-weight-boldest text-decoration-underline">
+
+                                                                                <td scope="col">Net Satislar = Net Satislar</td>
+
+                                                                                @for (int k = 0; k < (rasyo.Count); k++)
+                                                                                {
+                                                                                    <td scope="col" class="text-center"> @rasyo[k].NetSatislar_NetSatislar</td>
+                                                                                }
+
+                                                                            </tr>
+                                                                            <tr class="table-success font-weight-boldest text-decoration-underline">
+
+                                                                                <td scope="col">Net Faaliyet Karı = Net Faaliyet Karı</td>
+
+                                                                                @for (int k = 0; k < (rasyo.Count); k++)
+                                                                                {
+                                                                                    <td scope="col" class="text-center"> @rasyo[k].NetFaaliyetKari_NetFaaliyetKari</td>
+                                                                                }
+
+                                                                            </tr>
+                                                                            <tr class="table-success font-weight-boldest text-decoration-underline">
+
+                                                                                <td scope="col">Devamlı Sermaye = Uzun Vadeli Borçlar + Öz Sermaye</td>
+
+                                                                                @for (int k = 0; k < (rasyo.Count); k++)
+                                                                                {
+                                                                                    <td scope="col" class="text-center"> @rasyo[k].DevamliSermaye</td>
+                                                                                }
+
+                                                                            </tr>
+                                                                            <tr class="table-success font-weight-boldest text-decoration-underline">
+
+                                                                                <td scope="col">Faiz ve Vergi Öncesi Kar = Dönem Karı + Finansman Giderleri</td>
+
+                                                                                @for (int k = 0; k < (rasyo.Count); k++)
+                                                                                {
+                                                                                    <td scope="col" class="text-center"> @rasyo[k].FaizveVergiOncesiKar</td>
+                                                                                }
+
+                                                                            </tr>
+                                                                            <tr class="table-success font-weight-boldest text-decoration-underline">
+
+                                                                                <td scope="col">Hisse Başı Defter Değeri = Öz Sermaye / Ödenmiş Sermaye</td>
+
+                                                                                @for (int k = 0; k < (rasyo.Count); k++)
+                                                                                {
+                                                                                    <td scope="col" class="text-center"> @rasyo[k].HisseBasiDefterDegeri</td>
+                                                                                }
+
+                                                                            </tr>
+                                                                            <tr class="table-success font-weight-boldest text-decoration-underline">
+
+                                                                                <td scope="col">Taahhüt Faaliyetlerinden Geçici Kar/Zarar = Yıllara Yaygın İnşaat ve Onarım Hakedişleri - Yıllara Yaygın İnşaat ve Onarım Maaliyetleri</td>
+
+                                                                                @for (int k = 0; k < (rasyo.Count); k++)
+                                                                                {
+                                                                                    <td scope="col" class="text-center"> @rasyo[k].TaahhutFaaliyetlerindenGeciciKarZarar</td>
+                                                                                }
+
+                                                                            </tr>
+                                                                        </tbody>
+                                                                    </table>
+                                                                </div>
+                                                            </div>
+                                                            <div id="tab-91" class="tab-pane fade">
+                                                                <div class="row">
+                                                                    <table class="table table-borderless table align-middle table-hover fs-4">
+                                                                        <thead>
+                                                                            <tr>
+                                                                                <th>Rasyo Adı</th>
+                                                                                <th scope="col" class="text-center px-1" style="width: 160px; color: gray;"> @rasyo[0].Type</th>
+
+                                                                                @for (int k = 0; k < (rasyo.Count - 1); k++)
+                                                                                {
+
+                                                                                    <th scope="col" class="text-center px-1" style="width: 80px; color: gray;"> @rasyo[k + 1].Tarih</th>
+
+                                                                                }
+
+                                                                            </tr>
+                                                                        </thead>
+                                                                        <tbody>
+                                                                            <tr class="table-success font-weight-boldest text-decoration-underline">
+
+                                                                                <td scope="col">Net Yabancı Para Pozisyonu = Kambiyo Karları-Kambiyo Zararları</td>
+
+                                                                                @for (int k = 0; k < (rasyo.Count); k++)
+                                                                                {
+                                                                                    <td scope="col" class="text-center"> @rasyo[k].NetYabanciParaPozisyonu</td>
+                                                                                }
+
+                                                                            </tr>
+                                                                            <tr class="table-success font-weight-boldest text-decoration-underline">
+
+                                                                                <td scope="col">Satışların İçerisindeki İhracat Payı = Yurtdışı Satışlar / Net Satışlar</td>
+
+                                                                                @for (int k = 0; k < (rasyo.Count); k++)
+                                                                                {
+                                                                                    <td scope="col" class="text-center"> @rasyo[k].Satıslarinİcerisindekiİhracat</td>
+                                                                                }
+
+                                                                            </tr>
+                                                                        </tbody>
+                                                                    </table>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                        }
+                    }
+
+
+
+
+
+                </div>
+            </div>
+            <div class="footer-wrapper">
+                <div class="footer-section f-section-1">
+                    <p class="">Copyright © 2021 Fintech. All rights reserved.</p>
+                </div>
+                <div class="footer-section f-section-2">
+                    <p class="">Fintech <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-heart"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path></svg></p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+
+
+
+
+    <script src="/assets/js/libs/jquery-3.1.1.min.js"></script>
+    <script src="/bootstrap/js/popper.min.js"></script>
+    <script src="/bootstrap/js/bootstrap.min.js"></script>
+    <script src="/plugins/perfect-scrollbar/perfect-scrollbar.min.js"></script>
+    <script src="/assets/js/app.js"></script>
+    <script>
+        $(document).ready(function () {
+            App.init();
+        });
+    </script>
+    <script src="assets/js/custom.js"></script>
+</body>
+</html>

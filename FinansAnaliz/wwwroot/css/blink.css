@@ -1,0 +1,28 @@
+﻿.blink {
+    font-size: 25px;
+    width: 100px;
+    height: 50px;
+    background-color: orange;
+    animation: blink 1s linear infinite;
+}
+
+@keyframes blink {
+    0% {
+        opacity: 0;
+    }
+
+    50% {
+        opacity: .5;
+    }
+
+    100% {
+        opacity: 1;
+    }
+}
+
+.isDisabled {
+    color: currentColor;
+    cursor: not-allowed;
+    opacity: 0.7;
+    text-decoration: none;
+}

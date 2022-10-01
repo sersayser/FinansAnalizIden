@@ -1,0 +1,372 @@
+﻿@{
+    Layout = null;
+}
+@using Microsoft.AspNetCore.Identity
+@inject SignInManager<IdentityUser> SignInManager
+@inject UserManager<IdentityUser> UserManager
+@inject FinansAnaliz.Data.AppDbContext _appDbContext
+
+@{
+
+
+    var companyCount = _appDbContext.ruleProblemCompanies.Where(x => x.IsActive == true).Where(x => x.ProblemCompanyName != x.RegisterCompany).Select(x => x.ProblemCompanyName).Distinct().ToList();
+    var ruleCount = _appDbContext.ruleProblemCompanies.Where(x => x.IsActive == true).Where(x => x.ProblemCompanyName != x.RegisterCompany).Select(x => x.RuleId).Distinct().ToList();
+}
+
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, shrink-to-fit=no">
+    <title>Fintek - Takvim</title>
+    <link rel="icon" type="image/x-icon" href="assets/img/favicon.ico" />
+    <link href="https://fonts.googleapis.com/css?family=Quicksand:400,500,600,700&display=swap" rel="stylesheet">
+    <link href="/bootstrap/css/bootstrap.min.css" rel="stylesheet" type="text/css" />
+    <link href="/assets/css/plugins.css" rel="stylesheet" type="text/css" />
+    <link href="/plugins/fullcalendar/fullcalendar.css" rel="stylesheet" type="text/css" />
+    <link href="/plugins/fullcalendar/custom-fullcalendar.advance.css" rel="stylesheet" type="text/css" />
+    <link href="/plugins/flatpickr/flatpickr.css" rel="stylesheet" type="text/css">
+    <link href="/plugins/flatpickr/custom-flatpickr.css" rel="stylesheet" type="text/css">
+    <link href="/assets/css/forms/theme-checkbox-radio.css" rel="stylesheet" type="text/css" />
+    <style>
+        .widget {
+            margin-bottom: 10px;
+            border: none;
+            box-shadow: rgb(145 158 171 / 24%) 0px 0px 2px 0px, rgb(145 158 171 / 24%) 0px 16px 32px -4px;
+        }
+
+        .widget-content-area {
+            border-radius: 6px;
+        }
+
+        .daterangepicker.dropdown-menu {
+            z-index: 1059;
+        }
+    </style>
+</head>
+<body class="dashboard-analytics">
+    <div id="load_screen">
+        <div class="loader">
+            <div class="loader-content">
+                <div class="spinner-grow align-self-center"></div>
+            </div>
+        </div>
+    </div>
+    <div class="header-container fixed-top">
+        <header class="header navbar navbar-expand-sm">
+            <a href="javascript:void(0);" class="sidebarCollapse" data-placement="bottom"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-menu"><line x1="3" y1="12" x2="21" y2="12"></line><line x1="3" y1="6" x2="21" y2="6"></line><line x1="3" y1="18" x2="21" y2="18"></line></svg></a>
+            <img class="ml-auto" style="height:12%;width:12%" src="~/web/assets/images/logo/logo.png" />
+            <ul class="navbar-item flex-row navbar-dropdown search-ul">
+                <li class="nav-item dropdown notification-dropdown">
+                    <a href="javascript:void(0);" class="nav-link dropdown-toggle" id="notificationDropdown" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-bell"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path><path d="M13.73 21a2 2 0 0 1-3.46 0"></path></svg><span class="badge badge-primary">ss</span>
+                    </a>
+                    <div class="dropdown-menu position-absolute" aria-labelledby="notificationDropdown">
+                        <div class="notification-scroll">
+                            @{
+                                if (ruleCount.Count != 0 && companyCount.Count != 0)
+                                {
+                                    <div class="dropdown-item">
+                                        <div class="media file-upload">
+                                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-alert-circle"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="8" x2="12" y2="12"></line><line x1="12" y1="16" x2="12.01" y2="16"></line></svg>
+                                            <div class="media-body">
+                                                <div class="data-info text-nowrap">
+                                                    <h6 class="">@ruleCount.Count kuralda @companyCount.Count bayide eşik değerleri aşıldı.</h6>
+                                                    <a asp-controller="Rule" asp-action="Kural" class="">Detay için tıklayınız</a>
+                                                </div>
+
+                                                <div class="icon-status">
+                                                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-check"><polyline points="20 6 9 17 4 12"></polyline></svg>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                }
+
+                            }
+                        </div>
+                    </div>
+                </li>
+                <li class="nav-item dropdown user-profile-dropdown  order-lg-2 order-1">
+                    <a href="javascript:void(0);" class="nav-link dropdown-toggle user" id="userProfileDropdown" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                        <img src="/assets/img/90x90.jpg" alt="admin-profile" class="img-fluid">
+                    </a>
+                    <div class="dropdown-menu position-absolute" aria-labelledby="userProfileDropdown">
+                        <div class="user-profile-section">
+                            <div class="media mx-auto">
+                                <div class="media-body">
+                                    <h5>@User.Identity.Name</h5>
+                                    <p></p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="dropdown-item">
+                            <a asp-controller="Account" asp-action="LogOff">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-log-out"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path><polyline points="16 17 21 12 16 7"></polyline><line x1="21" y1="12" x2="9" y2="12"></line></svg> <span>Çıkış</span>
+                            </a>
+                        </div>
+                    </div>
+                </li>
+            </ul>
+        </header>
+    </div>
+    <div class="main-container" id="container">
+        <div class="overlay"></div>
+        <div class="search-overlay"></div>
+        <div class="sidebar-wrapper sidebar-theme">
+            <nav id="compactSidebar">
+                <ul class="navbar-nav theme-brand flex-row">
+                    <li class="nav-item theme-logo">
+                        <a href="index.html">
+                            <img src="/assets/img/90x90.jpg" class="navbar-logo" alt="logo">
+                        </a>
+                    </li>
+                </ul>
+                <ul class="menu-categories">
+                    <li class="menu menu-single active">
+                        <a asp-controller="Admin" asp-action="Index" data-active="false" class="menu-toggle">
+                            <div class="base-menu">
+                                <div class="base-icons">
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-home"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path><polyline points="9 22 9 12 15 12 15 22"></polyline></svg>
+                                </div>
+                                <span>Anasayfa</span>
+                            </div>
+                        </a>
+                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-chevron-left"><polyline points="15 18 9 12 15 6"></polyline></svg>
+                    </li>
+                    <li class="menu">
+                        <a href="#warning" data-active="false" class="menu-toggle">
+                            <div class="base-menu">
+                                <div class="base-icons">
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-zap"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon></svg>
+                                </div>
+                                <span>Uyarılar</span>
+                            </div>
+                        </a>
+                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-chevron-left"><polyline points="15 18 9 12 15 6"></polyline></svg>
+                    </li>
+                    <li class="menu">
+                        <a href="#guarantee" data-active="false" class="menu-toggle">
+                            <div class="base-menu">
+                                <div class="base-icons">
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-file-text"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line><polyline points="10 9 9 9 8 9"></polyline></svg>
+                                </div>
+                                <span>Teminatlar</span>
+                            </div>
+                        </a>
+                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-chevron-left"><polyline points="15 18 9 12 15 6"></polyline></svg>
+                    </li>
+                    <li class="menu menu-single">
+                        <a asp-controller="Calender" asp-action="Index" data-active="false" class="menu-toggle">
+                            <div class="base-menu">
+                                <div class="base-icons">
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-layout"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect><line x1="3" y1="9" x2="21" y2="9"></line><line x1="9" y1="21" x2="9" y2="9"></line></svg>
+                                </div>
+                                <span>Takvim</span>
+                            </div>
+                        </a>
+                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-chevron-left"><polyline points="15 18 9 12 15 6"></polyline></svg>
+                    </li>
+                    <li class="menu menu-single">
+                        <a asp-controller="Help" asp-action="Index" data-active="false" class="menu-toggle">
+                            <div class="base-menu">
+                                <div class="base-icons">
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-help-circle"><circle cx="12" cy="12" r="10"></circle><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"></path><line x1="12" y1="17" x2="12.01" y2="17"></line></svg>
+                                </div>
+                                <span>Destek</span>
+                            </div>
+                        </a>
+                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-chevron-left"><polyline points="15 18 9 12 15 6"></polyline></svg>
+                    </li>
+                    <li class="menu menu-single active">
+                        <a asp-controller="Settings" asp-action="Index" data-active="false" class="menu-toggle">
+                            <div class="base-menu">
+                                <div class="base-icons">
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-settings"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path></svg>
+                                </div>
+                                <span>Ayarlar</span>
+                            </div>
+                        </a>
+                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-chevron-left"><polyline points="15 18 9 12 15 6"></polyline></svg>
+                    </li>
+                </ul>
+            </nav>
+            <div id="compact_submenuSidebar" class="submenu-sidebar">
+                <div class="submenu" id="guarantee">
+                    <ul class="submenu-list" data-parent-element="#guarantee">
+                        <li>
+                            <a asp-controller="teminat" asp-action="AlinanTeminat"> Alınan Teminatlar </a>
+                        </li>
+                        <li>
+                            <a asp-controller="teminat" asp-action="VerilenTeminat"> Verilen Teminatlar </a>
+                        </li>
+                        <li>
+                            <a asp-controller="teminat" asp-action="VerilenTeminat"> Ayarlar </a>
+                        </li>
+                    </ul>
+                </div>
+                <div class="submenu" id="warning">
+                    <ul class="submenu-list" data-parent-element="#warning">
+                        <li>
+                            <a asp-controller="Rule" asp-action="Kural"> Uyarılar </a>
+                        </li>
+                        <li>
+                            <a asp-controller="Rule" asp-action="Settings"> Ayarlar </a>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+        <div id="content" class="main-content">
+            <div class="layout-px-spacing">
+                <div class="page-header">
+                    <nav class="breadcrumb-one" aria-label="breadcrumb">
+                        <ol class="breadcrumb">
+                            <li class="breadcrumb-item"><a href="javascript:void(0);">Apps</a></li>
+                            <li class="breadcrumb-item active" aria-current="page"><a href="javascript:void(0);">Calendar</a></li>
+                        </ol>
+                    </nav>
+                </div>
+                <div class="row layout-top-spacing" id="cancel-row">
+                    <div class="col-xl-12 col-lg-12 col-md-12">
+                        <div class="statbox widget box box-shadow">
+                            <div class="widget-content widget-content-area">
+                                <div class="calendar-upper-section">
+                                    <div class="row">
+                                        <div class="col-md-8 col-12">
+                                            <div class="labels">
+                                                <p class="label label-primary">Work</p>
+                                                <p class="label label-warning">Travel</p>
+                                                <p class="label label-success">Personal</p>
+                                                <p class="label label-danger">Important</p>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-4 col-12">
+                                            <form action="javascript:void(0);" class="form-horizontal mt-md-0 mt-3 text-md-right text-center">
+                                                <button id="myBtn" class="btn btn-primary"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-calendar mr-2"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg> Add Event</button>
+                                            </form>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div id="calendar"></div>
+                            </div>
+                        </div>
+                    </div>
+                    <div id="addEventsModal" class="modal animated fadeIn">
+                        <div class="modal-dialog modal-dialog-centered">
+                            <div class="modal-content">
+                                <div class="modal-body">
+                                    <span class="close">&times;</span>
+                                    <div class="add-edit-event-box">
+                                        <div class="add-edit-event-content">
+                                            <h5 class="add-event-title modal-title">Add Events</h5>
+                                            <h5 class="edit-event-title modal-title">Edit Events</h5>
+                                            <form class="">
+                                                <div class="row">
+                                                    <div class="col-md-12">
+                                                        <label for="start-date" class="">Event Title:</label>
+                                                        <div class="d-flex event-title">
+                                                            <input id="write-e" type="text" placeholder="Enter Title" class="form-control" name="task">
+                                                        </div>
+                                                    </div>
+                                                    <div class="col-md-6 col-sm-6 col-12">
+                                                        <div class="form-group start-date">
+                                                            <label for="start-date" class="">From:</label>
+                                                            <div class="d-flex">
+                                                                <input id="start-date" placeholder="Start Date" class="form-control" type="text">
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                    <div class="col-md-6 col-sm-6 col-12">
+                                                        <div class="form-group end-date">
+                                                            <label for="end-date" class="">To:</label>
+                                                            <div class="d-flex">
+                                                                <input id="end-date" placeholder="End Date" type="text" class="form-control">
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <div class="row">
+                                                    <div class="col-md-12">
+                                                        <label for="start-date" class="">Event Description:</label>
+                                                        <div class="d-flex event-description">
+                                                            <textarea id="taskdescription" placeholder="Enter Description" rows="3" class="form-control" name="taskdescription"></textarea>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <div class="row">
+                                                    <div class="col-md-12">
+                                                        <div class="event-badge">
+                                                            <p class="">Badge:</p>
+                                                            <div class="d-sm-flex d-block">
+                                                                <div class="n-chk">
+                                                                    <label class="new-control new-radio radio-primary">
+                                                                        <input type="radio" class="new-control-input" name="marker" value="bg-primary">
+                                                                        <span class="new-control-indicator"></span>Work
+                                                                    </label>
+                                                                </div>
+                                                                <div class="n-chk">
+                                                                    <label class="new-control new-radio radio-warning">
+                                                                        <input type="radio" class="new-control-input" name="marker" value="bg-warning">
+                                                                        <span class="new-control-indicator"></span>Travel
+                                                                    </label>
+                                                                </div>
+                                                                <div class="n-chk">
+                                                                    <label class="new-control new-radio radio-success">
+                                                                        <input type="radio" class="new-control-input" name="marker" value="bg-success">
+                                                                        <span class="new-control-indicator"></span>Personal
+                                                                    </label>
+                                                                </div>
+                                                                <div class="n-chk">
+                                                                    <label class="new-control new-radio radio-danger">
+                                                                        <input type="radio" class="new-control-input" name="marker" value="bg-danger">
+                                                                        <span class="new-control-indicator"></span>Important
+                                                                    </label>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </form>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="modal-footer">
+                                    <button id="discard" class="btn" data-dismiss="modal">Discard</button>
+                                    <button id="add-e" class="btn">Add Task</button>
+                                    <button id="edit-event" class="btn">Save</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="footer-wrapper">
+                <div class="footer-section f-section-1">
+                    <p class="">Copyright © 2021 <a target="_blank" href="https://designreset.com">DesignReset</a>, All rights reserved.</p>
+                </div>
+                <div class="footer-section f-section-2">
+                    <p class="">Coded with <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-heart"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path></svg></p>
+                </div>
+            </div>
+        </div>
+    </div>
+    <script src="/assets/js/libs/jquery-3.1.1.min.js"></script>
+    <script src="/plugins/jquery-ui/jquery-ui.min.js"></script>
+    <script src="/bootstrap/js/popper.min.js"></script>
+    <script src="/bootstrap/js/bootstrap.min.js"></script>
+    <script src="/plugins/perfect-scrollbar/perfect-scrollbar.min.js"></script>
+    <script src="/assets/js/app.js"></script>
+    <script>
+        $(document).ready(function () {
+            App.init();
+        });
+    </script>
+    <script src="/assets/js/custom.js"></script>
+    <script src="/plugins/fullcalendar/moment.min.js"></script>
+    <script src="/plugins/flatpickr/flatpickr.js"></script>
+    <script src="/plugins/fullcalendar/fullcalendar.min.js"></script>
+    <script src="/plugins/fullcalendar/custom-fullcalendar.advance.js"></script>
+</body>
+</html>

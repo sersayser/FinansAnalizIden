@@ -1,0 +1,173 @@
+﻿@model FinansAnaliz.Models.ViewModels.RegisterViewModel
+@{
+    Layout = null;
+}
+
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, shrink-to-fit=no">
+    <title>Fintek - Kullanıcı Kayıt</title>
+    <link rel="icon" type="image/x-icon" href="assets/img/favicon.ico" />
+    <!-- BEGIN GLOBAL MANDATORY STYLES -->
+    <link href="https://fonts.googleapis.com/css?family=Quicksand:400,500,600,700&display=swap" rel="stylesheet">
+    <link href="/bootstrap/css/bootstrap.min.css" rel="stylesheet" type="text/css" />
+    <link href="/assets/css/plugins.css" rel="stylesheet" type="text/css" />
+    <link href="/assets/css/authentication/form-2.css" rel="stylesheet" type="text/css" />
+    <link href="plugins/animate/animate.css" rel="stylesheet" type="text/css" />
+    <!-- END PAGE LEVEL PLUGINS -->
+    <!--  BEGIN CUSTOM STYLE FILE  -->
+    <link href="assets/css/scrollspyNav.css" rel="stylesheet" type="text/css" />
+    <link href="assets/css/components/custom-modal.css" rel="stylesheet" type="text/css" />
+    <!-- END GLOBAL MANDATORY STYLES -->
+    <link rel="stylesheet" type="text/css" href="/assets/css/forms/theme-checkbox-radio.css">
+    <link rel="stylesheet" type="text/css" href="/assets/css/forms/switches.css">
+</head>
+<body class="form">
+    <div class="form-container outer">
+        <div class="form-form">
+            <div class="form-form-wrap">
+                <div class="form-container">
+                    <div class="form-content">
+                        <img  style="height:50%;width:50%" src="~/web/assets/images/logo/logo.png" />
+                        <hr />
+                        <h1 class="">Kayıt Ol</h1>
+                        <p class="signup-link register">Daha önce kayıt yaptıysanız <a asp-controller="Account" asp-action="Login">Giriş</a></p>
+                        <form class="text-left" asp-controller="Account" asp-action="Register" role="form">
+                            <div asp-validation-summary="All" class="text-danger"></div>
+                            <div class="form">
+                                <div id="email-field" class="field-wrapper input">
+                                    <label asp-for="CompanyName">FİRMA ADI</label>
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-user"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>
+                                    <input id="companyname" asp-for="CompanyName" type="text" class="form-control" placeholder="Firma Adı">
+                                    <span asp-validation-for="CompanyName" class="text-danger"></span>
+                                </div>
+                                <div id="email-field" class="field-wrapper input">
+                                    <label asp-for="MainCompanyCode">ANA FİRMA KODU</label>
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-user"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>
+                                    <input id="email" asp-for="MainCompanyCode" type="text" class="form-control" placeholder="Ana Firma Kodu">
+                                    <span asp-validation-for="MainCompanyCode" class="text-danger"></span>
+                                </div>
+                                <div id="username-field" class="field-wrapper input">
+                                    <label asp-for="Name">Ad / SOYAD</label>
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-user"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>
+                                    <input id="username" asp-for="Name" type="text" class="form-control" placeholder="Ad / Soyad">
+                                    <span asp-validation-for="Name" class="text-danger"></span>
+                                </div>
+                                <div id="email-field" class="field-wrapper input">
+                                    <label asp-for="Email">EMAIL</label>
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-at-sign register"><circle cx="12" cy="12" r="4"></circle><path d="M16 8v5a3 3 0 0 0 6 0v-1a10 10 0 1 0-3.92 7.94"></path></svg>
+                                    <input id="email" asp-for="Email" type="text" value="" class="form-control" placeholder="Email">
+                                    <span asp-validation-for="Email" class="text-danger"></span>
+                                </div>
+                                <div class="field-wrapper input mb-2">
+                                    <div class="d-flex justify-content-between">
+                                        <label asp-for="Password">ŞİFRE</label>
+                                        <a href="auth_pass_recovery_boxed.html" class="forgot-pass-link">Şifremi Unuttum!</a>
+                                    </div>
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-lock"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg>
+                                    <input id="password" asp-for="Password" type="password" class="form-control" placeholder="Şifre">
+                                    <span asp-validation-for="Password" class="text-danger"></span>
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" id="toggle-password" class="feather feather-eye"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle></svg>
+                                </div>
+                                <div id="ConfirmPass-field" class="field-wrapper input mb-2">
+                                    <label asp-for="ConfirmPass">ŞİFRE TEKRAR</label>
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-lock"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg>
+                                    <input id="ConfirmPass" asp-for="ConfirmPass" type="password" class="form-control" placeholder="Şifre Tekrar">
+                                    <span asp-validation-for="ConfirmPass" class="text-danger"></span>
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" id="toggle-password" class="feather feather-eye"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle></svg>
+                                </div>
+                                <div class="field-wrapper terms_condition">
+                                    <div class="n-chk">
+                                        <label class="new-control new-checkbox checkbox-primary" asp-for="AcceptTerms">
+                                            <input asp-for="AcceptTerms" type="checkbox" class="new-control-input" checked disabled>
+                                            <span class="new-control-indicator"></span><span>I agree to the <a data-toggle="modal" data-target="#fadeinModal">  terms and conditions </a></span>
+                                        </label>
+                                    </div>
+                                </div>
+                                <div class="d-sm-flex justify-content-between">
+                                    <div class="field-wrapper">
+                                        <button type="submit" class="btn btn-primary" value="">Başvuru Yap</button>
+                                    </div>
+                                </div>
+                            </div>
+                        </form>
+                        <div id="fadeinModal" class="modal animated fadeInDown" role="dialog">
+                            <div class="modal-dialog modal-xl">
+                                <!-- Modal content-->
+                                <div class="modal-content">
+                                    <div class="modal-header">
+                                        <h2 class="modal-title">Terms of Service</h2>
+                                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                            <svg aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-x"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+                                        </button>
+                                    </div>
+                                    <div class="modal-body">
+                                        <div class="privacy-content-container">
+                                            <section>
+                                                <h5>Please read our policy carefully</h5>
+                                                <p>Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.</p>
+                                                <p>
+                                                    Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam,
+                                                    quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur.
+                                                </p>
+                                            </section>
+                                            <h5 class="policy-info-ques">What personal data we collect and why we collect it</h5>
+                                            <section>
+                                                <h5>Media</h5>
+                                                <p>If you upload images to the website, you should avoid uploading images with embedded location data (EXIF GPS) included. Visitors to the website can download and extract any location data from images on the website.</p>
+                                            </section>
+                                            <section>
+                                                <h5> Cookies </h5>
+                                                <p> If you leave a comment on our site you may opt-in to saving your name, email address and website in cookies. These are for your convenience so that you do not have to fill in your details again when you leave another comment. These cookies will last for one year.</p>
+                                                <p> If you have an account and you log in to this site, we will set a temporary cookie to determine if your browser accepts cookies. This cookie contains no personal data and is discarded when you close your browser.</p>
+                                                <p> When you log in, we will also set up several cookies to save your login information and your screen display choices. Login cookies last for two days, and screen options cookies last for a year. If you select “Remember Me”, your login will persist for two weeks. If you log out of your account, the login cookies will be removed.</p>
+                                                <p> If you edit or publish an article, an additional cookie will be saved in your browser. This cookie includes no personal data and simply indicates the post ID of the article you just edited. It expires after 1 day.</p>
+                                            </section>
+                                            <section>
+                                                <h5> Embedded content from other websites.</h5>
+                                                <p> Articles on this site may include embedded content (e.g. videos, images, articles, etc.). Embedded content from other websites behaves in the exact same way as if the visitor has visited the other website.</p>
+                                                <p> These websites may collect data about you, use cookies, embed additional third-party tracking, and monitor your interaction with that embedded content, including tracking your interaction with the embedded content if you have an account and are logged in to that website.</p>
+                                            </section>
+                                        </div>
+                                    </div>
+                                    <div class="modal-footer">
+                                        <button type="button" class="btn btn-primary" data-dismiss="modal">Okudum</button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+    <!-- BEGIN GLOBAL MANDATORY SCRIPTS -->
+    <script src="/assets/js/libs/jquery-3.1.1.min.js"></script>
+    <script src="/bootstrap/js/popper.min.js"></script>
+    <script src="/bootstrap/js/bootstrap.min.js"></script>
+    <script src="plugins/perfect-scrollbar/perfect-scrollbar.min.js"></script>
+    <script src="assets/js/app.js"></script>
+    <!-- END GLOBAL MANDATORY SCRIPTS -->
+    <script src="/assets/js/authentication/form-2.js"></script>
+    <script>
+        $(document).ready(function () {
+            App.init();
+        });
+    </script>
+    <script src="plugins/highlight/highlight.pack.js"></script>
+    <script src="assets/js/custom.js"></script>
+    <!-- END GLOBAL MANDATORY STYLES -->
+    <!--  BEGIN CUSTOM SCRIPT FILE  -->
+    <script src="assets/js/scrollspyNav.js"></script>
+
+</body>
+</html>
+
+@section Scripts{
+    @{ await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+}

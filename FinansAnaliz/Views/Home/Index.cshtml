@@ -1,0 +1,522 @@
+﻿
+@{
+    Layout = null;
+}
+
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="x-ua-compatible" content="ie=edge">
+    <title>FinansMetre - Finansal Skorlama Sistemi</title>
+    <meta name="description" content="">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="shortcut icon" type="image/x-icon" href="/web/assets/images/favicon.ico">
+    <link href="https://fonts.googleapis.com/css?family=Josefin+Sans:300,400,600,700" rel="stylesheet">
+    <link rel="stylesheet" href="/web/assets/css/plugins/pe-icon-7-stroke.css">
+    <link rel="stylesheet" href="/web/assets/css/plugins/font-awesome.min.css">
+    <link rel="stylesheet" href="/web/assets/css/plugins/flaticon.css">
+    <link rel="stylesheet" href="/web/assets/css/bootstrap.min.css">
+    <link rel="stylesheet" href="/web/assets/css/plugins/animate.min.css">
+    <link rel="stylesheet" href="/web/assets/css/plugins/meanmenu.css">
+    <link rel="stylesheet" href="/web/assets/css/plugins/slick.min.css">
+    <link rel="stylesheet" href="/web/assets/css/plugins/animated-headline.css">
+    <link rel="stylesheet" href="/web/assets/css/style.css">
+</head>
+<body>
+    <div class="wrapper" id="wrapper">
+        <header id="header" class="header sticky--header">
+            <div class="header__top bg--blue d-none d-lg-block">
+                <div class="container">
+                    <div class="header__top__inner">
+                        <ul class="header__top__info">
+                            <li>
+                                <a><i class="flaticon-old-typical-phone"></i> 0312 418 77 77</a>
+                            </li>
+                            <li>
+                                <a href="mailto://info@finansmetre.com"><i class="flaticon-black-back-closed-envelope-shape"></i> info@finansmetre.com</a>
+                            </li>
+                        </ul>
+                        <div class="header__top__button">
+                            <a class="cr-btn cr-btn--lg" asp-controller="Account" asp-action="Login">
+                                <span>BAYİ GİRİŞ</span>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="header__bottom bg--white">
+                <div class="container">
+                    <div class="header__bottom__inner">
+                        <div class="header__logo">
+                            <a asp-controller="Home" asp-action="Index">
+                                <img src="/web/assets/images/logo/logo.png" alt="header logo">
+                            </a>
+                        </div>
+                        <nav id="main-navigation" class="header__menu main-navigation d-none d-lg-flex">
+                            <ul>
+                                <li><a asp-controller="Home" asp-action="Index">ANASAYFA</a></li>
+                                <li><a href="#about-area">HAKKIMIZDA</a></li>
+                                <li><a href="#service-area">ÖZELLİKLER</a></li>
+                                <li><a href="#contact-area">İLETİŞİM</a></li>
+                            </ul>
+                        </nav>
+                        <button class="header__toggle d-lg-none" data-bs-toggle="offcanvas" data-bs-target="#offcanvasMenu"></button>
+                    </div>
+                </div>
+            </div>
+        </header>
+        <div class="banner-area">
+            <div class="banner banner--style2-slider-active banner--animated-content slider--pagination">
+                <div class="banner__single banner__single--style2 bg--grey" data-background-text="Finans">
+                    <div class="banner__single__thumb">
+                        <img class="banner__single__sadthumb" src="/web/assets/images/banner/sad-man-3.webp" alt="sad man">
+                    </div>
+                    <div class="container">
+                        <div class="row justify-content-end">
+                            <div class="col-lg-7">
+                                <div>
+                                    <h1 class="text-success">BAYİLERİM İLE</h1>
+                                    <h1>NE ŞEKİLDE ÇALIŞMALIYIM?</h1>
+                                    <a href="#contact-area" class="cr-btn">RANDEVU için</a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="banner__single banner__single--style2 bg--grey" data-background-text="Finans">
+                    <div class="banner__single__thumb">
+                        <img class="banner__single__sadthumb" src="/web/assets/images/banner/sad-man-2.webp" alt="sad man">
+                    </div>
+                    <div class="container">
+                        <div class="row justify-content-end">
+                            <div class="col-lg-7">
+                                <div>
+                                    <h1 class="text-success">BAYİLERİNİZİN / İŞ ORTAĞINIZIN</h1>
+                                    <h1><strong>KREDİ RİSKİNİ</strong></h1>
+                                    <h1>BİLİYOR MUSUNUZ?</h1>
+                                    <a href="#contact-area" class="cr-btn">RANDEVU için</a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="banner__single banner__single--style2 bg--grey" data-background-text="Finans">
+                    <div class="banner__single__thumb">
+                        <img class="banner__single__sadthumb" src="/web/assets/images/banner/sad-man.webp" alt="sad man">
+                    </div>
+                    <div class="container">
+                        <div class="row justify-content-end">
+                            <div class="col-lg-7">
+                                <div>
+                                    <h1 class="text-success">KARA KARA DÜŞÜNMEYİN!</h1>
+                                    <h1><strong>FİNANS ANALİZ</strong> SİSTEMİMİZ</h1>
+                                    <h1>YANINIZDA!</h1>
+                                    <a href="#contact-area" class="cr-btn">RANDEVU için</a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="offcanvas offcanvas-start" tabindex="2" id="offcanvasMenu">
+            <div class="offcanvas-header">
+                <div class="offcanvas__logo">
+                    <a asp-controller="Home" asp-action="Index">
+                        <img src="/web/assets/images/logo/Untitled-1.png" alt="header logo">
+                    </a>
+                </div>
+                <button type="button" class="btn-close text-reset" data-bs-dismiss="offcanvas" aria-label="Close"></button>
+            </div>
+            <div class="offcanvas-body">
+                <ul class="offcanvas__info">
+                    <li>
+                        <a><i class="flaticon-old-typical-phone"></i> 0312 418 77 77</a>
+                    </li>
+                    <li>
+                        <a href="mailto://info@finansmetre.com"><i class="flaticon-black-back-closed-envelope-shape"></i> info@finansmetre.com</a>
+                    </li>
+                </ul>
+                <nav class="canvas-menu">
+                    <ul>
+                        <li><a asp-controller="Home" asp-action="Index">ANASAYFA</a></li>
+                        <li><a href="#about-area">HAKKIMIZDA</a></li>
+                        <li><a href="#service-area">ÖZELLİKLER</a></li>
+                        <li><a href="#contact-area">İLETİŞİM</a></li>
+                    </ul>
+                </nav>
+                <div class="offcanvas__button">
+                    <a class="cr-btn cr-btn--lg" href="#contact-area">
+                        <span>Randevu</span>
+                    </a>
+                </div>
+            </div>
+        </div>
+        <main class="page-content">
+            <section id="about" class="cr-section features-area">
+                <div class="row g-0">
+                    <div class="col-lg-4">
+                        <div class="feature">
+                            <div class="feature__icon">
+                                <span>
+                                    <i class="flaticon-shield"></i>
+                                </span>
+                                <span>
+                                    <i class="flaticon-shield"></i>
+                                </span>
+                            </div>
+                            <div class="feature__content">
+                                <h4 class="wow fadeInUp">
+                                    <a>KOLAY KULLANIM</a>
+                                </h4>
+                                <p class="wow fadeInUp" data-wow-delay="0.15s">Sistemimizin sunduğu web ve API çözümlerinin kolay kullanımı ile iş süreçlerini aksatmadan en hızlı şekilde müşteri ve iş ortaklarının en güncel kredi risk durumunu hesaplar ve farklı uygulamalar üzerinden gösterir.</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-lg-4">
+                        <div class="feature active">
+                            <div class="feature__icon">
+                                <span>
+                                    <i class="flaticon-team"></i>
+                                </span>
+                                <span>
+                                    <i class="flaticon-team"></i>
+                                </span>
+                            </div>
+                            <div class="feature__content">
+                                <h4 class="wow fadeInUp">
+                                    <a>ZENGİNLEŞTİRİLMİŞ VERİ</a>
+                                </h4>
+                                <p class="wow fadeInUp" data-wow-delay="0.15s">Sistem, tüm ticari şirketlerin mali tabloları üzerinden 20+ rasyoyu ele alarak belirlenen döneme göre skorlayıp, risk segmentini belirleyen  Şirket Skorlama Sistemini oluşturmuştur.  </p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-lg-4">
+                        <div class="feature">
+                            <div class="feature__icon">
+                                <span>
+                                    <i class="flaticon-24-hours"></i>
+                                </span>
+                                <span>
+                                    <i class="flaticon-24-hours"></i>
+                                </span>
+                            </div>
+                            <div class="feature__content">
+                                <h4 class="wow fadeInUp">
+                                    <a>HIZLI GÜNCELLEME</a>
+                                </h4>
+                                <p class="wow fadeInUp" data-wow-delay="0.15s">Reel sektörün iş yapış şekli, ekonomik durum, kişilerin satın alma ve ödeme davranışlarındaki değişimler dikkate alınarak bayinizin finansal performansı sürekli takip edebilir ve en güncel haline ulaşabilirsiniz. </p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+            <section id="about-area" class="cr-section about-area bg--white section-padding--xlg">
+                <div class="container">
+                    <div class="row align-items-center">
+                        <div class="col-lg-6 order-2 order-kg-1">
+                            <div class="about-area__content about-area__content--left">
+                                <h4>"<span class="color--theme">FinansMetre</span>" Nedir?</h4>
+                                <h3 class="cd-headline cx-heading slide">
+                                    FinansMetre
+                                    <span class="color--theme cd-words-wrapper cd-words-wrapper-2">
+                                        <b class="is-visible">Rasyonel</b>
+                                        <b>Merkezi</b>
+                                        <b>Gerçekçi</b>
+                                    </span>
+                                    Kararlar almanızı sağlar.
+                                </h3>
+                                <p>Ticari şirketlerin mali tabloları üzerinden 20+ rasyoyu ele alarak belirlenen döneme göre skorlayıp, risk segmentini belirleyen Şirket Skorlama Sistemi oluşturulmuştur.</p>
+                                <p>Puanlama sistemimiz şirketin belirlenen herhangi bir dönemdeki mali yapısının röntgenini çekerek, finansal durumu hakkında bilgi ve buna bağlı aksiyon almamızı destekler.</p>
+                                <p>Böylece bayilerimizin almış olduğu puan, vadeli ödemelerini gelecek dönemde ne ölçüde yerine getireceğini tahmin etmemizi sağlayıp, şirketimizin ticari risklerimizin ölçülmesini amaçlar. </p>
+                            </div>
+                        </div>
+                        <div class="col-lg-6 order-1 order-lg-2 text-lg-right text-center">
+                            <div class="about-area__image about-area__image--right">
+                                <img src="/web/assets/images/about/about-thumbnail-2.webp" alt="about area image">
+                                <span class="about-area__image__marker">FinansMetre</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+            <section id="service-area" class="service-area section-padding--xlg bg--white">
+                <div class="container">
+                    <div class="row">
+                        <div class="col-lg-12 col-md-12 col-12">
+                            <div class="section-title">
+                                <h4>FİNANSMETRE</h4>
+                                <h2>
+                                    NASIL
+                                    <span class="color--theme">ÇALIŞIR?</span>
+                                </h2>
+                                <p>Ticari şirketlerin mali tabloları üzerinden 20+ rasyoyu ele alarak belirlenen döneme göre skorlayıp, risk segmentini belirleyen Şirket Skorlama Sistemi oluşturulmuştur. Puanlama sistemimiz şirketin belirlenen herhangi bir dönemdeki mali yapısının röntgenini çekerek, finansal durumu hakkında bilgi ve buna bağlı aksiyon almamızı destekler.</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row align-items-start">
+                        <div class="col-lg-12">
+                            <div class="service-area__services">
+                                <div class="row">
+                                    <div class="col-lg-6 col-md-6 wow flipInX">
+                                        <div class="service">
+                                            <div class="service__icon">
+                                                <img src="/web/assets/images/icons/service-icon-user.webp" alt="service icon">
+                                            </div>
+                                            <div class="service__content">
+                                                <h5>
+                                                    <a>Tahsilat riskinizi doğru yöneterek işinizi güvenle büyütün</a>
+                                                </h5>
+                                                <p>Müşteri ve alacak yönetimi hizmeti sunan sistemimiz, taksitli ve vadeli satış yapan perakende ve toptan satış bayilerimize satış kararlarına destek olacak çözümler sunmaktadır. Bu sayede satışlar artırılırken, şüpheli alacak riski azaltılmaya çalışılmaktadır. </p>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="col-lg-6 col-md-6 wow flipInX">
+                                        <div class="service">
+                                            <div class="service__icon">
+                                                <img src="/web/assets/images/icons/service-icon-bar.webp" alt="service icon">
+                                            </div>
+                                            <div class="service__content">
+                                                <h5>
+                                                    <a>İşletmenizi ödenmemiş faturalardan korumak için mevcut değerlendirme süreçlerinize ne kadar güveniyorsunuz</a>
+                                                </h5>
+                                                <p>Bir şirketin finansal istikrarını belirlemeye yardımcı olan, işletmeye ait veriler ile hazırlanan İşletme Skorumuz, gelişmiş mali analiz tekniklerini içerir.Raporda gördüğünüz puanlar, hızlı ve doğru kararlar vermenize yardımcı olmak için tasarlanmıştır.</p>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="col-lg-6 col-md-6 wow flipInX">
+                                        <div class="service">
+                                            <div class="service__icon">
+                                                <img src="/web/assets/images/icons/service-icon-briefcase.webp" alt="service icon">
+                                            </div>
+                                            <div class="service__content">
+                                                <h5>
+                                                    <a>Bekleyen alacaklarınızın kontrolünü, çeviklik, esneklik ve bağımsızlık sistemimiz ile güvence altına alın.</a>
+                                                </h5>
+                                                <p>Sistemin gücü ve esnekliğini, mevcut ve yeni müşteriler için kararlar almanız, alacak riskinin analizi, tahmine dayalı puanlama, müşteri segmentasyonu, işletme raporlaması ve tahsilat stratejileri gibi birçok farklı işlemi ele almak için kullanabilirsiniz. </p>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="col-lg-6 col-md-6 wow flipInX">
+                                        <div class="service">
+                                            <div class="service__icon">
+                                                <img src="/web/assets/images/icons/service-icon-pie.webp" alt="service icon">
+                                            </div>
+                                            <div class="service__content">
+                                                <h5>
+                                                    <a>Bilinçli finansal kararlar almanızı sağlayarak, işinizi büyütmenize yardımcı olur.</a>
+                                                </h5>
+                                                <p>Günlük operasyonlarınızı etkileyen önemli finansal kararlar hakkında saniyeler içinde kararlar verebilirsiniz. Veri analitiği ve karar çözümlerimizle entegre olarak, iş yapma şeklinizi sonsuza kadar değiştirebilir, zamandan ve paradan tasarruf etmenize yardımcı olabiliriz. </p>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+            <div id="funfact-area" class="funfact-area bg--white">
+                <div class="funfacts">
+                    <div class="row g-0">
+                        <div class="col-lg-3 col-md-6 col-sm-6">
+                            <div class="funfact text-center">
+                                <h1>
+                                    <span class="counter">103</span>
+                                </h1>
+                                <h5>FİNANSAL RAPOR</h5>
+                            </div>
+                        </div>
+                        <div class="col-lg-3 col-md-6 col-sm-6">
+                            <div class="funfact text-center">
+                                <h1>
+                                    <span class="counter">85</span>
+                                </h1>
+                                <h5>RASYO</h5>
+                            </div>
+                        </div>
+                        <div class="col-lg-3 col-md-6 col-sm-6">
+                            <div class="funfact text-center">
+                                <h1>
+                                    <span class="counter">19</span>
+                                </h1>
+                                <h5>BAYİ</h5>
+                            </div>
+                        </div>
+                        <div class="col-lg-3 col-md-6 col-sm-6">
+                            <div class="funfact text-center">
+                                <h1>
+                                    <span class="counter">25</span>
+                                </h1>
+                                <h5>AYLIK VERİ</h5>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <section id="cta-area" class="cta-area section-padding--sm bg--grey--light bg--abstruct-mask">
+                <div class="container">
+                    <div class="row justify-content-center">
+                        <div class="col-lg-10">
+                            <div class="calltoaction text-center">
+                                <h3>
+                                    BAYİLERİM İLE HANGİ
+                                    <span class="color--theme"> ŞARTLARDA </span> ÇALIŞMALIYIM?
+                                </h3>
+                                <p>Vadeli ve açık yöntemler ile satış yapan şirketlerin, alacaklarını zamanında tahsil edememesi, kendi borçlarını zamanında ödeyemeyeceği anlamına gelmektedir. Borçlarını zamanında ödeyemeyen işletmelerin de zamanla kredi finansmanına ulaşım imkanı, ne yazık ki mümkün olmayacaktır. </p>
+                                <p>Kapsamlı kredi raporlarıyla, kendi alacaklarınızın yönetimini kolay bir iş haline getiriyoruz.</p>
+                                <h6><a href="#contact-area">İletişime Geçmek için</a></h6>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+            <section id="contact-area" class="m-0 p-0 bg--grey">
+                <div class="pg-contact bg--white">
+                    <div class="google-map-wrapper p-0 m-0">
+                        <div id="google-map" class="row google-map">
+                            <iframe src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d1530.1852766228003!2d32.81151553232255!3d39.91072298760084!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x14d34f3a1fcf993f%3A0x8d66d5134e33489!2sNext%20Level%20A%20blok%20ofis!5e0!3m2!1str!2str!4v1640433217000!5m2!1str!2str" width="1080" height="800" style="border:0;" allowfullscreen="true" loading="lazy"></iframe>
+                        </div>
+                        <div class="container">
+                            <div class="row">
+                                <div class="col-xl-8 col-lg-9">
+                                    <div class="pg-contact__content">
+                                        <h1>Ofisimize Hoşgeldiniz</h1>
+                                        <p>Şirketinize özel hizmetlerimizi sizlerle isteriz.</p>
+                                        <div class="pg-contact__blocks">
+                                            <div class="single-block address">
+                                                <h6>adres</h6>
+                                                <p>Kızılırmak Mh. Dumlupınar Blv. Next Level İş Merkezi D:81 Çankaya / Ankara</p>
+                                            </div>
+                                            <div class="single-block phone">
+                                                <h6>tel / fax</h6>
+                                                <p><a>0 312 945 04 49</a></p>
+                                                <p><a>0 850 522 34 03</a></p>
+                                            </div>
+                                            <div class="single-block web">
+                                                <h6>web</h6>
+                                                <p><a>info@finansmetre.com</a></p>
+                                                <p><a>www@finansmetre.com</a></p>
+                                            </div>
+                                        </div>
+                                        <div class="row">
+                                            <div class="col-lg-8">
+                                                <div class="pg-contact__newsletter">
+                                                    <h5>Size özel tekliflerimizi iletmek için sabırsızlanıyoruz.</h5>
+                                                    <form asp-controller="Home" asp-action="Index" method="post" target="_blank">
+                                                        <input type="tel" name="phone" class="email" id="phone" placeholder="Telefonuzu gönderin. Sizi arayalım." required>
+                                                        <button type="submit"><i class="fa fa-paper-plane-o"></i></button>
+                                                    </form>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </main>
+        <footer id="footer" class="footer-area fixed--footer pb-1">
+            <div class="footer-area__widgets section-padding--md bg--dark--light">
+                <div class="container">
+                    <div class="footer-area__logo text-center">
+                        <a href="index.html">
+                            <img src="/web/assets/images/logo/logowhite.png" alt="footer logo">
+                        </a>
+                    </div>
+                    <div class="widget-area footer--widgets">
+                        <section class="widget widget-about">
+                            <h5 class="widget-title">SOSYAL MEDYA</h5>
+                            <p>Bize ulaşmak ve geliştirmelerimizden haber olmak için lütfen bizi aşağıdaki sosyal medya adreslerimizden takip edin.</p>
+                            <div class="social-icons social-icons--rounded">
+                                <ul>
+                                    <li class="facebook">
+                                        <a href="https://www.facebook.com/">
+                                            <i class="fa fa-facebook"></i>
+                                        </a>
+                                    </li>
+                                    <li class="twitter">
+                                        <a href="https://twitter.com/">
+                                            <i class="fa fa-twitter"></i>
+                                        </a>
+                                    </li>
+                                    <li class="instagram">
+                                        <a href="https://www.instagram.com/">
+                                            <i class="fa fa-instagram"></i>
+                                        </a>
+                                    </li>
+                                    <li class="google-plus">
+                                        <a href="https://plus.google.com/discover">
+                                            <i class="fa fa-google-plus"></i>
+                                        </a>
+                                    </li>
+                                </ul>
+                            </div>
+                        </section>
+                        <section class="widget widget-quick-links">
+                            <h5 class="widget-title">HIZLI LİNKLER</h5>
+                            <ul>
+                                <li>
+                                    <a href="#service-area">Servislerimiz</a>
+                                </li>
+                                <li>
+                                    <a href="#about-area">Hakkımızda</a>
+                                </li>
+                                <li>
+                                    <a href="#contact-area">İletişim</a>
+                                </li>
+                                <li>
+                                    <a asp-controller="Account" asp-action="Login">Bayi Girişi</a>
+                                </li>
+                            </ul>
+                        </section>
+                        <section class="widget widget-twitter-feed">
+                            <h5 class="widget-title">Kimler İçin?</h5>
+                            <ul>
+                                <li>
+                                    <p>Bankaların gözüyle kendilerini ve müşterilerini/tedarikçilerini değerlendirmek isteyen firmalar için.</p>
+                                </li>
+                            </ul>
+                        </section>
+                        <section class="widget widget-contact-info">
+                            <h5 class="widget-title">İletişim</h5>
+                            <ul>
+                                <li>
+                                    <p>Kızılırmak Mh. Dumlupınar Blv. Next Level İş Merkezi D:81 Çankaya / Ankara</p>
+                                </li>
+                                <li>
+                                    <p>
+                                        <a>0 312 945 04 49</a>
+                                    </p>
+                                    <p>
+                                        <a>0 850 522 34 03</a>
+                                    </p>
+                                </li>
+                                <li>
+                                    <p>
+                                        <a href="mailto://info@finansmetre.com">info@finansmetre.com</a>
+                                    </p>
+                                    <p>
+                                        <a>www.finansmetre.com</a>
+                                    </p>
+                                </li>
+                            </ul>
+                        </section>
+                    </div>
+                </div>
+            </div>
+        </footer>
+    </div>
+    <script src="/web/assets/js/vendor/modernizr-3.5.0.min.js"></script>
+    <script src="/web/assets/js/vendor/jquery-3.2.1.min.js"></script>
+    <script src="/web/assets/js/popper.min.js"></script>
+    <script src="/web/assets/js/bootstrap.min.js"></script>
+    <script src="/web/assets/js/plugins.js"></script>
+    <script src="/web/assets/js/ajax-mail.js"></script>
+    <script src="/web/assets/js/active.js"></script>
+    <script src="/web/assets/js/scripts.js"></script>
+</body>
+</html>

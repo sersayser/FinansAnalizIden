@@ -1,0 +1,575 @@
+﻿@{
+    Layout = null;
+}
+@using Microsoft.AspNetCore.Identity
+@inject SignInManager<IdentityUser> SignInManager
+@inject UserManager<IdentityUser> UserManager
+@inject FinansAnaliz.Data.AppDbContext _appDbContext
+
+
+@{
+    //IEnumerable<int> xs = x is null ? new List<int>() { 0, 1 } : new int[] { 2, 3 };
+    List<FinansAnaliz.Models.Rasyo> Rasyo = ViewBag.Rasyo is null ? new List<FinansAnaliz.Models.Rasyo>() { } : ViewBag.Rasyo;
+    List<FinansAnaliz.Models.TekliVeri> Tekli = ViewBag.Tekli is null ? new List<FinansAnaliz.Models.TekliVeri>() { new TekliVeri() { Altman_Z_Hizmet = "-", Altman_Z_Uretim = "-", Dupond_Analizi = "-" } } : ViewBag.Tekli;
+    List<DateTime> entryDates = ViewBag.entryDates is null ? new List<DateTime>() { } : ViewBag.entryDates;
+
+    List<Rasyo> rasyoSelectedDate = Rasyo.Count is 0 ? new List<Rasyo>() { new Rasyo { DevamliSermayeKarMarji = "-", DonenVarliklarDevirHizi = "-", BorclanmaKatsayisi = "-", AlacaklarinOrtalamaTahsilSuresi = "-", FaaliyetKarliligi = "-", NakitOrani = "-", FinansalKaldirac = "-", } } : (from rasyo in Rasyo where rasyo.Tarih == entryDates[0].ToString("yyyy-MM-dd") select rasyo).ToList();
+    //var FinansalKaldirac = (from rasyo in Rasyo orderby rasyo.FinansalKaldirac descending select rasyo).FirstOrDefault();
+    //var FaaliyetKarliligi = (from rasyo in Rasyo orderby rasyo.FaaliyetKarliligi descending select rasyo).FirstOrDefault();
+    //var NakitOrani = (from rasyo in Rasyo orderby rasyo.NakitOrani descending select rasyo).FirstOrDefault();
+
+
+    var skoru = Tekli.Count is 0 ? new TekliVeri { Altman_Z_Hizmet = "-", Altman_Z_Uretim = "-", Dupond_Analizi = "-", FirmaSkoru = "-" } : ((from tekli in Tekli orderby tekli.FirmaSkoru descending select tekli).FirstOrDefault());
+    //var likiditeOrani = (from rasyo in Rasyo orderby rasyo.LikiditeOrani descending select rasyo).FirstOrDefault();
+    //var nakitOrani = (from rasyo in Rasyo orderby rasyo.NakitOrani descending select rasyo).FirstOrDefault();
+
+    //var SelectRasyo = (from rasyo in Rasyo join tekli in Tekli on rasyo.CompanyName equals tekli.CompanyName where rasyo.Tarih == "2020-01-31" select new { rasyo.DevamliSermaye, rasyo.CompanyName, tekli.FirmaSkoru, rasyo.StokDevirHizi, rasyo.AlacakDevirHizi, rasyo.BorcOdemeSuresi }).ToList();
+    var SelectRasyo = (from rasyo in Rasyo join tekli in Tekli on rasyo.CompanyName equals tekli.CompanyName where rasyo.Tarih == entryDates[0].ToString("yyyy-MM-dd") select new { rasyo, firmaSkoru = tekli.FirmaSkoru }).ToList();
+
+    var user = _appDbContext.AppUsers.FirstOrDefault(x => x.UserName == SignInManager.UserManager.GetUserName(User));
+
+    var ruleCount = _appDbContext.ruleProblemCompanies.Where(x => x.IsActive == true).Where(x => x.RegisterCompany == user.CompanyName).Select(x => x.RuleId).Distinct().ToList();
+
+
+}
+
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, shrink-to-fit=no">
+    <title>Fintek - Dashboard</title>
+    <link rel="icon" type="image/x-icon" href="/assets/img/favicon.ico" />
+    <link href="/assets/css/loader.css" rel="stylesheet" type="text/css" />
+    <script src="/assets/js/loader.js"></script>-->
+    <link href="https://fonts.googleapis.com/css?family=Quicksand:400,500,600,700&display=swap" rel="stylesheet">
+    <link href="/bootstrap/css/bootstrap.min.css" rel="stylesheet" type="text/css" />
+    <link href="/assets/css/plugins.css" rel="stylesheet" type="text/css" />
+    <link rel="/stylesheet" href="assets/css/new.css" type="text/css">
+    <link href="/plugins/apex/apexcharts.css" rel="stylesheet" type="text/css">
+    <link href="/assets/css/dashboard/dash_1.css" rel="stylesheet" type="text/css" class="dashboard-analytics" />
+    <link rel="/stylesheet" type="text/css" href="assets/css/widgets/modules-widgets.css">
+    <link href="/css/new.css" rel="stylesheet" type="text/css" />
+    <link href="/css/blink.css" rel="stylesheet" type="text/css" />
+</head>
+<body class="dashboard-analytics">
+    <div id="load_screen">
+        <div class="loader">
+            <div class="loader-content">
+                <div class="spinner-grow align-self-center"></div>
+            </div>
+        </div>
+    </div>
+    <div class="header-container fixed-top">
+        <header class="header navbar navbar-expand-sm">
+            <a href="javascript:void(0);" class="sidebarCollapse" data-placement="bottom"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-menu"><line x1="3" y1="12" x2="21" y2="12"></line><line x1="3" y1="6" x2="21" y2="6"></line><line x1="3" y1="18" x2="21" y2="18"></line></svg></a>
+            <img class="ml-auto" style="height:12%;width:12%" src="~/web/assets/images/logo/logo.png" />
+            <ul class="navbar-item flex-row navbar-dropdown search-ul">
+                <li class="nav-item align-self-center search-animated">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-search toggle-search"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+                </li>
+                <li class="nav-item dropdown notification-dropdown">
+                    <a href="javascript:void(0);" class="nav-link dropdown-toggle" id="notificationDropdown" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-bell"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path><path d="M13.73 21a2 2 0 0 1-3.46 0"></path></svg><span class="badge badge-primary">ss</span>
+                    </a>
+                    <div class="dropdown-menu position-absolute" aria-labelledby="notificationDropdown">
+                        <div class="notification-scroll">
+                            @{
+                                if (ruleCount.Count != 0)
+                                {
+                                    <div class="dropdown-item">
+                                        <div class="media file-upload">
+                                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-alert-circle"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="8" x2="12" y2="12"></line><line x1="12" y1="16" x2="12.01" y2="16"></line></svg>
+                                            <div class="media-body">
+                                                <div class="data-info text-nowrap">
+                                                    <h6 class="">@ruleCount.Count kuralda eşik değerleri aşıldı.</h6>
+                                                    <a asp-controller="CRule" asp-action="Rule" class="">Detay için tıklayınız</a>
+                                                </div>
+
+                                                <div class="icon-status">
+                                                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-check"><polyline points="20 6 9 17 4 12"></polyline></svg>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                }
+                                else
+                                {
+                                    <div class="dropdown-item">
+                                        <div class="media file-upload">
+                                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-alert-circle"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="8" x2="12" y2="12"></line><line x1="12" y1="16" x2="12.01" y2="16"></line></svg>
+                                            <div class="media-body">
+                                                <div class="data-info text-nowrap">
+                                                    <h6 class="">0 kuralda eşik değerleri aşıldı.</h6>
+
+                                                </div>
+
+                                                <div class="icon-status">
+                                                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-check"><polyline points="20 6 9 17 4 12"></polyline></svg>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                }
+
+                            }
+                        </div>
+                    </div>
+                </li>
+                <li class="nav-item dropdown user-profile-dropdown  order-lg-2 order-1">
+                    <a href="javascript:void(0);" class="nav-link dropdown-toggle user" id="userProfileDropdown" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                        <img src="/assets/img/90x90.jpg" alt="admin-profile" class="img-fluid">
+                    </a>
+                    <div class="dropdown-menu position-absolute" aria-labelledby="userProfileDropdown">
+                        <div class="user-profile-section">
+                            <div class="media mx-auto">
+
+                                <div class="media-body">
+                                    <h5>@User.Identity.Name</h5>
+                                    <p></p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="dropdown-item">
+                            <a asp-controller="Account" asp-action="LogOff">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-log-out"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path><polyline points="16 17 21 12 16 7"></polyline><line x1="21" y1="12" x2="9" y2="12"></line></svg> <span>Çıkış</span>
+                            </a>
+                        </div>
+                    </div>
+                </li>
+            </ul>
+        </header>
+    </div>
+    <div class="main-container" id="container">
+
+        <div class="overlay"></div>
+        <div class="search-overlay"></div>
+        <div class="sidebar-wrapper sidebar-theme">
+            <nav id="compactSidebar">
+                <ul class="navbar-nav theme-brand flex-row">
+                    <li class="nav-item theme-logo">
+                        <a href="index.html">
+                            <img src="/assets/img/90x901.jpg" class="navbar-logo" alt="logo">
+                        </a>
+                    </li>
+                </ul>
+                <ul class="menu-categories">
+                    @{
+                        if (Rasyo.Count == 0)
+                        {
+
+                            <li class="menu menu-single active">
+                                <a data-active="false" class="menu-toggle" asp-controller="Client" asp-action="Index">
+                                    <div class="base-menu">
+                                        <div class="base-icons">
+                                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-home"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path><polyline points="9 22 9 12 15 12 15 22"></polyline></svg>
+                                        </div>
+                                        <span>Anasayfa</span>
+                                    </div>
+                                </a>
+                                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-chevron-left"><polyline points="15 18 9 12 15 6"></polyline></svg>
+                            </li>
+                            <li class="menu menu-single">
+                                <a data-active="false" class="menu-toggle" asp-controller="CDetail" asp-action="Index">
+                                    <div class="base-menu">
+                                        <div class="base-icons">
+                                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-trending-up"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"></polyline><polyline points="17 6 23 6 23 12"></polyline></svg>
+                                        </div>
+                                        <span>Mali Tablolar</span>
+                                    </div>
+                                </a>
+                                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-chevron-left"><polyline points="15 18 9 12 15 6"></polyline></svg>
+                            </li>
+                            <li class="menu menu-single">
+                                <a data-active="false" class="menu-toggle blink" asp-controller="MizanYukle" asp-action="Yukleme">
+                                    <div class="base-menu">
+                                        <div class="base-icons">
+                                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" d"="" class="feather feather-download"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
+                                        </div>
+                                        <span style="color:white">Mizan Yükle</span>
+                                    </div>
+                                </a>
+                                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-chevron-left"><polyline points="15 18 9 12 15 6"></polyline></svg>
+                            </li>
+                            <li class="menu">
+                                <a href="#warning" data-active="false" class="menu-toggle" disabled>
+                                    <div class="base-menu">
+                                        <div class="base-icons">
+                                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-zap"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon></svg>
+                                        </div>
+                                        <span>Uyarılar</span>
+                                    </div>
+                                </a>
+                                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-chevron-left"><polyline points="15 18 9 12 15 6"></polyline></svg>
+                            </li>
+                            <li class="menu">
+                                <a href="#guarantee" data-active="false" class="menu-toggle">
+                                    <div class="base-menu">
+                                        <div class="base-icons">
+                                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-file-text"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line><polyline points="10 9 9 9 8 9"></polyline></svg>
+                                        </div>
+                                        <span>Teminatlar</span>
+                                    </div>
+                                </a>
+                                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-chevron-left"><polyline points="15 18 9 12 15 6"></polyline></svg>
+                            </li>
+                            <li class="menu menu-single">
+                                <a data-active="false" class="menu-toggle" asp-controller="Chelp" asp-action="Index">
+                                    <div class="base-menu">
+                                        <div class="base-icons">
+                                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-help-circle"><circle cx="12" cy="12" r="10"></circle><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"></path><line x1="12" y1="17" x2="12.01" y2="17"></line></svg>
+                                        </div>
+                                        <span>Destek</span>
+                                    </div>
+                                </a>
+                                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-chevron-left"><polyline points="15 18 9 12 15 6"></polyline></svg>
+                            </li>
+                            <li class="menu menu-single active">
+                                <a asp-controller="Settings" asp-action="Client" data-active="false" class="menu-toggle">
+                                    <div class="base-menu">
+                                        <div class="base-icons">
+                                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-settings"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path></svg>
+                                        </div>
+                                        <span>Ayarlar</span>
+                                    </div>
+                                </a>
+                                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-chevron-left"><polyline points="15 18 9 12 15 6"></polyline></svg>
+                            </li>
+
+
+                        }
+                        else
+                        {
+
+                            <li class="menu menu-single active">
+                                <a data-active="false" class="menu-toggle" asp-controller="Client" asp-action="Index">
+                                    <div class="base-menu">
+                                        <div class="base-icons">
+                                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-home"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path><polyline points="9 22 9 12 15 12 15 22"></polyline></svg>
+                                        </div>
+                                        <span>Anasayfa</span>
+                                    </div>
+                                </a>
+                                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-chevron-left"><polyline points="15 18 9 12 15 6"></polyline></svg>
+                            </li>
+                            <li class="menu menu-single">
+                                <a data-active="false" class="menu-toggle" asp-controller="CDetail" asp-action="Index">
+                                    <div class="base-menu">
+                                        <div class="base-icons">
+                                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-trending-up"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"></polyline><polyline points="17 6 23 6 23 12"></polyline></svg>
+                                        </div>
+                                        <span>Mali Tablolar</span>
+                                    </div>
+                                </a>
+                                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-chevron-left"><polyline points="15 18 9 12 15 6"></polyline></svg>
+                            </li>
+                            <li class="menu menu-single">
+                                <a blank"="" data-active="false" class="menu-toggle" asp-controller="MizanYukle" asp-action="Yukleme">
+                                    <div class="base-menu">
+                                        <div class="base-icons">
+                                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" d"="" class="feather feather-download"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
+                                        </div>
+                                        <span>Mizan Yükle</span>
+                                    </div>
+                                </a>
+                                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-chevron-left"><polyline points="15 18 9 12 15 6"></polyline></svg>
+                            </li>
+                            <li class="menu">
+                                <a href="#warning" data-active="false" class="menu-toggle">
+                                    <div class="base-menu">
+                                        <div class="base-icons">
+                                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-zap"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon></svg>
+                                        </div>
+                                        <span>Uyarılar</span>
+                                    </div>
+                                </a>
+                                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-chevron-left"><polyline points="15 18 9 12 15 6"></polyline></svg>
+                            </li>
+                            <li class="menu">
+                                <a href="#guarantee" data-active="false" class="menu-toggle">
+                                    <div class="base-menu">
+                                        <div class="base-icons">
+                                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-file-text"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line><polyline points="10 9 9 9 8 9"></polyline></svg>
+                                        </div>
+                                        <span>Teminatlar</span>
+                                    </div>
+                                </a>
+                                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-chevron-left"><polyline points="15 18 9 12 15 6"></polyline></svg>
+                            </li>
+                            <li class="menu menu-single">
+                                <a data-active="false" class="menu-toggle" asp-controller="Chelp" asp-action="Index">
+                                    <div class="base-menu">
+                                        <div class="base-icons">
+                                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-help-circle"><circle cx="12" cy="12" r="10"></circle><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"></path><line x1="12" y1="17" x2="12.01" y2="17"></line></svg>
+                                        </div>
+                                        <span>Destek</span>
+                                    </div>
+                                </a>
+                                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-chevron-left"><polyline points="15 18 9 12 15 6"></polyline></svg>
+                            </li>
+                            <li class="menu menu-single active">
+                                <a asp-controller="Settings" asp-action="Client" data-active="false" class="menu-toggle">
+                                    <div class="base-menu">
+                                        <div class="base-icons">
+                                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-settings"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path></svg>
+                                        </div>
+                                        <span>Ayarlar</span>
+                                    </div>
+                                </a>
+                                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-chevron-left"><polyline points="15 18 9 12 15 6"></polyline></svg>
+                            </li>
+
+                        }
+                    }
+                </ul>
+            </nav>
+            <div id="compact_submenuSidebar" class="submenu-sidebar">
+                <div class="submenu" id="guarantee">
+                    <ul class="submenu-list" data-parent-element="#guarantee">
+                        <li>
+                            <a asp-controller="CTeminat" asp-action="AlinanTeminat"> Alınan Teminatlar </a>
+                        </li>
+                        <li>
+                            <a asp-controller="CTeminat" asp-action="VerilenTeminat"> Verilen Teminatlar </a>
+                        </li>
+                    </ul>
+                </div>
+                <div class="submenu" id="warning">
+                    <ul class="submenu-list" data-parent-element="#warning">
+                        <li>
+                            <a asp-controller="CRule" asp-action="Rule"> Uyarılar </a>
+                        </li>
+                        <li>
+                            <a asp-controller="CRule" asp-action="Settings"> Ayarlar </a>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+        <div id="content" class="main-content mt-0">
+            <div class="layout-px-spacing">
+                <div class="page-header">
+                    <nav class="breadcrumb-one" aria-label="breadcrumb">
+                        <ol class="breadcrumb">
+                            <li class="breadcrumb-item"><a href="javascript:void(0);">Dashboard</a></li>
+                        </ol>
+                    </nav>
+                </div>
+                <div class="row layout-top-spacing">
+                    <div class="col-xl-3 col-lg-12 col-md-12 col-sm-12 col-12 layout-spacing">
+                        <div class="card">
+                            <div class="card-body">
+                                <h5 class="card-title">Nakit Oranı</h5>
+                                <h6 class="card-subtitle mb-2  text-warning">
+                                    Nakit girişi olmaksızın kısa
+                                    vadeli borçların ödenebilme
+                                    durumunu gösterir.
+                                </h6>
+                                <h1 class="card-text">@rasyoSelectedDate[0].NakitOrani  </h1>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-xl-3 col-lg-12 col-md-12 col-sm-12 col-12 layout-spacing">
+                        <div class="card">
+                            <div class="card-body">
+                                <h5 class="card-title">Finansal Kaldıraç</h5>
+                                <h6 class="card-subtitle mb-2 text-warning">İşletmenin varlıklarının ne oranda borç ile finanse edildiğini göstermektedir. </h6>
+                                <h1 class="card-text">@rasyoSelectedDate[0].FinansalKaldirac</h1>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-xl-3 col-lg-12 col-md-12 col-sm-12 col-12 layout-spacing">
+                        <div class="card">
+                            <div class="card-body">
+                                <h5 class="card-title">Faaliyet Karlılığı</h5>
+                                <h6 class="card-subtitle mb-2  text-warning">Bir işletmenin esas faaliyetinden ne ölçüde karlı olduğunu gösterir</h6>
+                                <h1 class="card-text">@rasyoSelectedDate[0].FaaliyetKarliligi</h1>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-xl-3 col-lg-12 col-md-12 col-sm-12 col-12 layout-spacing">
+                        <div class="card">
+                            <div class="card-body">
+                                <h5 class="card-title">Alacak Tahsil Süresi</h5>
+                                <h6 class="card-subtitle mb-2  text-warning">
+                                    İşletmenin alacaklarını ne kadar süre
+                                    içinde tahsil ettiğini gösterir
+                                </h6>
+                                <h1 class="card-text">@rasyoSelectedDate[0].AlacaklarinOrtalamaTahsilSuresi</h1>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="row layout-top-spacing">
+                    <div class="col-xl-7 col-lg-6 col-md-6 col-sm-6 col-6 layout-spacing">
+                        <div class="widget widget-account-invoice-three ">
+                            <div class="widget-heading" style=" border-radius: 15px; border-color: #888ea8 ">
+                                <div class="row">
+                                    <div class="col-xl-4 p-xl-5">
+                                        <div class="wrapper">
+                                            <h3>Fintek Puanı</h3>
+                                            <div class="content text-center">
+
+                                                @{
+                                                    if (skoru.FirmaSkoru == null)
+                                                    {
+                                                        <p class="text-dark" style="font-size: 70px;"><strong>( - )</strong></p>
+                                                    }
+                                                    else
+                                                    {
+                                                        <p class="text-dark" style="font-size: 70px;"><strong>( @FinansAnaliz.Models.FintechScore.Check(Convert.ToInt32(skoru.FirmaSkoru)) )</strong></p>
+                                                    }
+
+                                                }
+
+
+                                                <p class="text-white" style="font-size: 80px; background-color: orange;">@skoru.FirmaSkoru</p>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="col-xl-8 p-xl-5">
+                                        <h3 class="text-center" style="color:coral"><strong>Skor Notu:</strong></h3>
+                                        <p class="text-dark text-center" style="font-size: 28px;align-items:center">
+                                            @{
+                                                if (skoru.FirmaSkoru == null)
+                                                {
+                                                <p class="text-dark text-center" style="font-size: 28px;align-items:center">Değerlendirme yapılacak veri bulunmamaktadır! Lütfen en az 2 dönem mizan girişi yapınız.</p>
+                                                }
+                                                else
+                                                {
+                                                <p class="text-dark text-center" style="font-size: 28px;align-items:center">@FintechScore.ScoreNotes(Convert.ToInt32(skoru.FirmaSkoru))</p>
+
+                                                }
+
+                                            }
+
+
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="widget-content text-center p-0" style="border-radius: 15px;margin-top: 20px;margin-bottom:0px">
+                                <h4>Referans Skalası</h4>
+                                <div class="col-12 col-xl-12 p-0 m-0"><div><svg xmlns="http://www.w3.org/2000/svg" width="100%" height="30 "><!----></svg><div><svg xmlns="http://www.w3.org/2000/svg" width="100%" height="140"><defs><polygon id="Triangle" points="0,20 10,0 20,20" style="fill: rgb(99, 159, 179);"></polygon></defs><defs><polygon id="TriangleR" points="0,0 10,20 20,0" style="fill: rgb(99, 159, 179);"></polygon></defs><g><!----><rect x="25" width="105" height="70" y="15" rx="10" style="fill: rgb(147, 0, 9);"></rect></g><g><rect x="120" width="95" height="70" y="15" style="fill: rgb(198, 50, 6);"></rect><!----></g><g><rect x="215" width="95" height="70" y="15" style="fill: rgb(219, 77, 39);"></rect><!----></g><g><rect x="310" width="95" height="70" y="15" style="fill: rgb(255, 92, 42);"></rect><!----></g><g><rect x="405" width="95" height="70" y="15" style="fill: rgb(255, 126, 49);"></rect><!----></g><g><rect x="500" width="95" height="70" y="15" style="fill: rgb(255, 145, 54);"></rect><!----></g><g><rect x="595" width="95" height="70" y="15" style="fill: rgb(255, 157, 60);"></rect><!----></g><g><rect x="690" width="95" height="70" y="15" style="fill: rgb(0, 166, 134);"></rect><!----></g><g><rect x="785" width="95" height="70" y="15" style="fill: rgb(0, 152, 120);"></rect><!----></g><g><rect x="880" width="95" height="70" y="15" style="fill: rgb(0, 137, 118);"></rect><rect x="880" width="105" height="70" y="15" rx="10" style="fill: rgb(0, 137, 118);"></rect></g><g><text x="25" y="10" style="fill: rgb(105, 130, 122); font-size: 12px; font-family: auto; font-weight: 800;">0</text><text x="120" y="10" style="fill: rgb(105, 130, 122); font-size: 12px; font-family: auto; font-weight: 800;">400</text><text x="215" y="10" style="fill: rgb(105, 130, 122); font-size: 12px; font-family: auto; font-weight: 800;">800</text><text x="310" y="10" style="fill: rgb(105, 130, 122); font-size: 12px; font-family: auto; font-weight: 800;">1200</text><text x="405" y="10" style="fill: rgb(105, 130, 122); font-size: 12px; font-family: auto; font-weight: 800;">1600</text><text x="500" y="10" style="fill: rgb(105, 130, 122); font-size: 12px; font-family: auto; font-weight: 800;">2000</text><text x="595" y="10" style="fill: rgb(105, 130, 122); font-size: 12px; font-family: auto; font-weight: 800;">2400</text><text x="690" y="10" style="fill: rgb(105, 130, 122); font-size: 12px; font-family: auto; font-weight: 800;">2800</text><text x="785" y="10" style="fill: rgb(105, 130, 122); font-size: 12px; font-family: auto; font-weight: 800;">3200</text><text x="880" y="10" style="fill: rgb(105, 130, 122); font-size: 12px; font-family: auto; font-weight: 800;">3600</text></g><g><text x="965" y="10" style="fill: rgb(105, 130, 122); font-size: 12px; font-family: auto; font-weight: 800;">4000</text></g><g><text x="62.5" y="58" style="fill: white; font-size: 18px; font-family: auto; font-weight: 800;">D</text><text x="157.5" y="58" style="fill: white; font-size: 18px; font-family: auto; font-weight: 800;">C-</text><text x="252.5" y="58" style="fill: white; font-size: 18px; font-family: auto; font-weight: 800;">C</text><text x="347.5" y="58" style="fill: white; font-size: 18px; font-family: auto; font-weight: 800;">C+</text><text x="442.5" y="58" style="fill: white; font-size: 18px; font-family: auto; font-weight: 800;">B-</text><text x="537.5" y="58" style="fill: white; font-size: 18px; font-family: auto; font-weight: 800;">B</text><text x="632.5" y="58" style="fill: white; font-size: 18px; font-family: auto; font-weight: 800;">B+</text><text x="727.5" y="58" style="fill: white; font-size: 18px; font-family: auto; font-weight: 800;">A-</text><text x="822.5" y="58" style="fill: white; font-size: 18px; font-family: auto; font-weight: 800;">A</text><text x="917.5" y="58" style="fill: white; font-size: 18px; font-family: auto; font-weight: 800;">A+</text></g></svg></div></div></div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-xl-2 col-lg-6 col-md-6 col-sm-12 col-12 layout-spacing">
+                        <div class="widget-content">
+                            <div class="row">
+                                <div class="col-12 p-2">
+                                    <div class="card">
+                                        <div class="card-body">
+                                            <h5 class="card-title">Altman-Z Skoru Hizmet</h5>
+                                            <h3 class="card-subtitle mb-2  text-warning"> @Tekli[0].Altman_Z_Hizmet</h3>
+                                            <div class="card-text pt-1 pb-3">
+                                                <img src="/assets/img/altmanz-hizmet.svg" style="width: 100%; position: relative; top: 20px; height: 35px;">
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-12 p-2">
+                                    <div class="card">
+                                        <div class="card-body">
+                                            <h5 class="card-title">Altman-Z Skoru Üretim</h5>
+                                            <h3 class="card-subtitle mb-2  text-warning"> @Tekli[0].Altman_Z_Uretim</h3>
+                                            <div class="card-text pt-1 pb-3">
+                                                <img src="/assets/img/altmanz-hizmet.svg" style="width: 100%; position: relative; top: 20px; height: 35px;">
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-12 p-2">
+                                    <div class="card">
+                                        <div class="card-body">
+                                            <h5 class="card-title">Dupond Analizi</h5>
+                                            <h3 class="card-subtitle mb-2  text-warning"> @Tekli[0].Dupond_Analizi</h3>
+                                            <div class="card-text pt-1 pb-3">
+                                                <img src="/assets/img/altmanz-hizmet.svg" style="width: 100%; position: relative; top: 20px; height: 35px;">
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-xl-3 col-lg-6 col-md-6 col-sm-12 col-12 layout-spacing bg-blue">
+                        <div class="widget-content">
+                            <div class="row">
+                                <div class="col-12 p-2">
+                                    <div class="card">
+                                        <div class="card-body">
+                                            <h5 class="card-title">Borçlanma Katsayısı</h5>
+                                            <h6 class="card-subtitle mb-2  text-warning">
+                                                İşletmeye ait finansal riskin
+                                                belirlenmesi amacını taşır.
+                                            </h6>
+                                            <h1 class="card-text">@rasyoSelectedDate[0].BorclanmaKatsayisi </h1>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-12 p-2">
+                                    <div class="card">
+                                        <div class="card-body">
+                                            <h5 class="card-title">Dönen Varık Devir Hızı</h5>
+                                            <h6 class="card-subtitle mb-2  text-warning">
+                                                Maddi duran varlıkların kullanım
+                                                etkinliğini ölçer.
+                                            </h6>
+                                            <h1 class="card-text">@rasyoSelectedDate[0].DonenVarliklarDevirHizi  </h1>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-12 p-2">
+                                    <div class="card">
+                                        <div class="card-body">
+                                            <h5 class="card-title">Devamlı Sermaye Kar Marjı</h5>
+                                            <h6 class="card-subtitle mb-2  text-warning">
+                                                Sahip olunan aktiflerin ne ölçüde karlı
+                                                kullanıldığını ölçer
+                                            </h6>
+                                            <h1 class="card-text">@rasyoSelectedDate[0].DevamliSermayeKarMarji  </h1>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="footer-wrapper">
+                    <div class="footer-section f-section-1">
+                        <p class="">Copyright © 2021 Fintek.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <script src="/assets/js/libs/jquery-3.1.1.min.js"></script>
+    <script src="/bootstrap/js/popper.min.js"></script>
+    <script src="/bootstrap/js/bootstrap.min.js"></script>
+    <script src="/plugins/perfect-scrollbar/perfect-scrollbar.min.js"></script>
+    <script src="/assets/js/app.js"></script>
+    <script>
+        $(document).ready(function () {
+            App.init();
+        });
+    </script>
+    <script src="/assets/js/dashboard/dash_1.js"></script>
+    <script src="/assets/js/custom.js"></script>
+    <script src="/plugins/apex/apexcharts.min.js"></script>
+    <script src="/assets/js/widgets/modules-widgets.js"></script>
+    <script>
+        $(document).ready(function () {
+
+            $.getJSON("https://localhost:44360/Client/GetAjax", function (result) {
+                console.log(result);
+            });
+        });
+
+    </script>
+</body>
+</html>
